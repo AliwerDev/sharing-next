@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  full_name    String
+  phone_number String    @unique
+  password     String
+  location     String
+  karma_points Int       @default(0)
+  role         Role      @default(USER)
+  created_at   DateTime  @default(now())
+
+  items        Item[]    @relation("UserItems")
+  requests     Request[] @relation("UserRequests")
+  reports      Report[]  @relation("UserReports")
+}
+
+model Item {
+  id          String      @id @default(uuid()) @db.Uuid
+  user_id     String      @db.Uuid
+  category_id String      @db.Uuid
+  title       String
+  description String
+  status      ItemStatus  @default(ACTIVE)
+  created_at  DateTime    @default(now())
+
+  owner       User        @relation("UserItems", fields: [user_id], references: [id])
+  category    Category    @relation("CategoryItems", fields: [category_id], references: [id])
+  images      ItemImage[] @relation("ItemImages")
+  requests    Request[]   @relation("ItemRequests")
+  reports     Report[]    @relation("ItemReports")
+}
+
+model ItemImage {
+  id        String @id @default(uuid()) @db.Uuid
+  item_id   String @db.Uuid
+  image_url String
+
+  item      Item   @relation("ItemImages", fields: [item_id], references: [id])
+}
+
+model Category {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String @unique
+
+  items Item[] @relation("CategoryItems")
+}
+
+model Request {
+  id           String        @id @default(uuid()) @db.Uuid
+  item_id      String        @db.Uuid
+  requester_id String        @db.Uuid
+  status       RequestStatus @default(PENDING)
+  created_at   DateTime      @default(now())
+
+  item         Item          @relation("ItemRequests", fields: [item_id], references: [id])
+  requester    User          @relation("UserRequests", fields: [requester_id], references: [id])
+}
+
+model Report {
+  id          String   @id @default(uuid()) @db.Uuid
+  item_id     String   @db.Uuid
+  reporter_id String   @db.Uuid
+  reason      String
+  created_at  DateTime @default(now())
+
+  item        Item     @relation("ItemReports", fields: [item_id], references: [id])
+  reporter    User     @relation("UserReports", fields: [reporter_id], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ItemStatus {
+  ACTIVE
+  RESERVED
+  GIVEN
+  DELETED
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
