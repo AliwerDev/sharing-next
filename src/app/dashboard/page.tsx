@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { HandoverModal } from "@/components/HandoverModal";
 import { useGetMyItems, useGetMyRequests, useGetIncomingRequests, useUpdateRequestStatus } from "@/api/hooks";
 import { toast } from "sonner";
+import { StatusBadge } from "@/components/ui/status-badge";
 import Link from "next/link";
 
 function getImageUrl(url?: string) {
@@ -115,15 +116,7 @@ function DashboardContent() {
                               </span>
                             )}
                           </div>
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full self-start mt-1 ${
-                            item.status === "ACTIVE" 
-                              ? "bg-status-active-bg text-status-active" 
-                              : item.status === "RESERVED"
-                              ? "bg-status-reserved-bg text-status-reserved"
-                              : "bg-status-given-bg text-status-given"
-                          }`}>
-                            {item.status}
-                          </span>
+                          <StatusBadge status={item.status} className="self-start mt-1 px-2 py-0.5" />
                           <div className="mt-auto pt-2 flex items-center text-xs text-muted-foreground font-medium">
                             View Applicants ({itemRequests.length}) <ChevronRight className="w-4 h-4 ml-1" />
                           </div>
@@ -161,17 +154,9 @@ function DashboardContent() {
                       </div>
                     </div>
                     <div className="flex flex-col sm:items-end gap-2 shrink-0">
-                      <span className={`text-xs font-semibold px-3 py-1 rounded-full self-start sm:self-auto ${
-                        req.status === "PENDING"
-                          ? "bg-status-active-bg text-status-active"
-                          : req.status === "APPROVED"
-                          ? "bg-status-reserved-bg text-status-reserved"
-                          : req.status === "REJECTED"
-                          ? "bg-destructive/10 text-destructive"
-                          : "bg-status-given-bg text-status-given"
-                      }`}>
+                      <StatusBadge status={req.status} className="self-start sm:self-auto px-3 py-1">
                         {req.status === "APPROVED" ? "APPROVED - Phone Unveiled" : req.status}
-                      </span>
+                      </StatusBadge>
                       {(req.status === "APPROVED" || req.status === "COMPLETED") && req.item?.user?.phone_number && (
                         <a href={`tel:${req.item.user.phone_number}`} className="flex items-center gap-1 text-sm font-bold text-primary hover:underline mt-1 block">
                           <Phone className="w-4 h-4" /> {req.item.user.phone_number}

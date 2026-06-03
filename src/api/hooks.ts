@@ -376,3 +376,35 @@ export const useDeleteCategory = () => {
     },
   });
 };
+
+// --- Stats Interfaces ---
+export interface SharingStats {
+  totalUsers: number;
+  totalItems: number;
+  completedHandovers: number;
+  activeListings: number;
+  totalKarmaPoints: number;
+  recentShares: {
+    id: string;
+    title: string;
+    created_at: string;
+    user: {
+      full_name: string;
+      location: string;
+    };
+  }[];
+}
+
+/**
+ * Fetch platform-wide statistics
+ */
+export const useGetStats = () => {
+  return useQuery({
+    queryKey: ['stats'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<SharingStats>('/stats');
+      return data;
+    },
+  });
+};
+

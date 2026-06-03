@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, Suspense } from "react";
+import React, { useState, useRef, Suspense } from "react";
 import { Navigation } from "@/components/Navigation";
 import { UploadCloud, X, MapPin, CheckCircle, Leaf, ArrowRight, ChevronLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,6 @@ function ShareWizardContent() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
-  const [location, setLocation] = useState("Downtown, Block 4");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showKarmaModal, setShowKarmaModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -34,11 +33,7 @@ function ShareWizardContent() {
   const uploadImageMutation = useUploadImage();
   const createItemMutation = useCreateItem();
 
-  useEffect(() => {
-    if (profile?.location) {
-      setLocation(profile.location);
-    }
-  }, [profile]);
+  const location = profile?.location || "Downtown, Block 4";
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -104,7 +99,7 @@ function ShareWizardContent() {
           <CheckCircle className="w-12 h-12" />
         </div>
 
-        <h1 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-emerald-500 to-emerald-700 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold text-center mb-4 bg-linear-to-r from-emerald-500 to-emerald-700 bg-clip-text text-transparent">
           Thank you for giving back!
         </h1>
         <p className="text-xl text-muted-foreground text-center max-w-md mb-12">

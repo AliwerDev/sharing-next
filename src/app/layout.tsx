@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 import SessionProvider from "@/components/providers/SessionProvider";
 import AxiosInterceptor from "@/components/providers/AxiosInterceptor";
 import "./globals.css";
 
-const outfit = Outfit({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
 });
 
@@ -21,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${outfit.className} h-full antialiased`}>
+    <html lang="en" className={`${plusJakartaSans.className} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <SessionProvider>
           <AxiosInterceptor>

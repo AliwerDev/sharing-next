@@ -8,7 +8,7 @@
 
 :root {
   /* === TYPOGRAPHY === */
-  --font-primary: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-primary: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-size: 16px;
 
   /* Font Sizes - Modern Geometric Scale */
@@ -227,8 +227,24 @@
   --color-emerald-500: var(--emerald-500);
   --color-amber-400: var(--amber-400);
   --color-status-active: var(--status-active);
+  --color-status-active-bg: var(--status-active-bg);
   --color-status-reserved: var(--status-reserved);
+  --color-status-reserved-bg: var(--status-reserved-bg);
   --color-status-given: var(--status-given);
+  --color-status-given-bg: var(--status-given-bg);
+
+  /* Accordion Animations */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from { height: 0; }
+    to { height: var(--radix-accordion-content-height); }
+  }
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); }
+    to { height: 0; }
+  }
 }
 
 /* === BASE STYLES === */
