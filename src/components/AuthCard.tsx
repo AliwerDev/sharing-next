@@ -8,6 +8,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useRegister } from "@/api/hooks";
 import { toast } from "sonner";
+import { YandexMapModal } from "./YandexMapModal";
 
 export function AuthCard() {
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -18,6 +19,9 @@ export function AuthCard() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [location, setLocation] = useState("");
+  const [latitude, setLatitude] = useState<number | undefined>(undefined);
+  const [longitude, setLongitude] = useState<number | undefined>(undefined);
+  const [showMapModal, setShowMapModal] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -50,6 +54,16 @@ export function AuthCard() {
     e.preventDefault();
     if (registerStep === 1) {
       setRegisterStep(2);
+      // Attempt to retrieve coordinate location automatically
+      if (typeof window !== "undefined" && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            setLatitude(pos.coords.latitude);
+            setLongitude(pos.coords.longitude);
+          },
+          () => {}
+        );
+      }
     } else {
       setIsLoading(true);
       try {
@@ -58,7 +72,9 @@ export function AuthCard() {
           password,
           full_name: fullName,
           location,
-        });
+          latitude,
+          longitude,
+        } as any);
         
         // After successful registration, log them in automatically
         const res = await signIn("credentials", {
@@ -262,6 +278,15 @@ export function AuthCard() {
                           required
                         />
                       </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowMapModal(true)}
+                        className="w-full py-5 rounded-xl border-dashed border-primary/40 hover:border-primary text-primary flex items-center justify-center gap-2 mt-2 font-medium"
+                      >
+                        <MapPin className="w-4 h-4" />
+                        {latitude && longitude ? "Change location on Map" : "Select location on Map"}
+                      </Button>
                       <p className="text-xs text-muted-foreground mt-2">
                         This helps us show you items shared nearby.
                       </p>
@@ -304,6 +329,20 @@ export function AuthCard() {
           )}
         </AnimatePresence>
       </div>
+
+      {showMapModal && (
+        <YandexMapModal
+          initialLat={latitude}
+          initialLng={longitude}
+          initialAddress={location}
+          onClose={() => setShowMapModal(false)}
+          onSelect={(lat, lng, addr) => {
+            setLatitude(lat);
+            setLongitude(lng);
+            setLocation(addr);
+          }}
+        />
+      )}
     </div>
   );
 }

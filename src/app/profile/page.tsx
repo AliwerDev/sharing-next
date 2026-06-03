@@ -1,13 +1,23 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Navigation } from "@/components/Navigation";
-import { Star, MapPin, Award, Gift, HandHeart, Calendar, Lock, User as UserIcon, Phone, Loader2 } from "lucide-react";
+import { Star, MapPin, Award, Gift, HandHeart, Calendar, Lock, User as UserIcon, Phone, Loader2, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useGetProfile, useUpdateProfile, useGetMyItems, useGetMyRequests } from "@/api/hooks";
+import { useGetProfile, useUpdateProfile, useGetMyItems, useGetMyRequests, useUploadImage } from "@/api/hooks";
 import { toast } from "sonner";
+import { YandexMapModal } from "@/components/YandexMapModal";
 
-export default function ProfilePage() {
+function getImageUrl(url?: string) {
+  if (!url) return "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80";
+  if (url.startsWith('/uploads')) {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    return `${backendUrl}${url}`;
+  }
+  return url;
+}
+
+function ProfileContent() {
   // Queries
   const { data: profile, isLoading: isProfileLoading } = useGetProfile();
   const { data: myShares = [] } = useGetMyItems();
@@ -15,18 +25,24 @@ export default function ProfilePage() {
 
   // Mutations
   const updateProfileMutation = useUpdateProfile();
+  const uploadImageMutation = useUploadImage();
 
   // Form states
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [location, setLocation] = useState("");
   const [password, setPassword] = useState("");
+  const [latitude, setLatitude] = useState<number | undefined>(undefined);
+  const [longitude, setLongitude] = useState<number | undefined>(undefined);
+  const [showMapModal, setShowMapModal] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || "");
       setPhone(profile.phone_number || "");
       setLocation(profile.location || "");
+      setLatitude(profile.latitude || undefined);
+      setLongitude(profile.longitude || undefined);
     }
   }, [profile]);
 
@@ -48,12 +64,26 @@ export default function ProfilePage() {
   const activeRequestsCount = myRequests.filter((r) => r.status === "PENDING" || r.status === "APPROVED").length;
 
   const achievements = [
-    { id: 1, title: "First Gift", icon: <Gift className="w-8 h-8" />, unlocked: sharedCount >= 1, color: "text-emerald-500" },
-    { id: 2, title: "Category Expert", icon: <Award className="w-8 h-8" />, unlocked: sharedCount >= 3, color: "text-blue-500" },
-    { id: 3, title: "Neighbor of the Month", icon: <Star className="w-8 h-8" />, unlocked: karma > 100, color: "text-amber-500" },
-    { id: 4, title: "Eco Hero", icon: <HandHeart className="w-8 h-8" />, unlocked: karma > 150, color: "text-primary" },
-    { id: 5, title: "100 Karma Club", icon: <Award className="w-8 h-8" />, unlocked: karma >= 100, color: "text-purple-500" },
+    { id: 1, title: "First Gift", icon: <Gift className="w-8 h-8" />, unlocked: sharedCount >= 1 || profile?.badges?.includes("First Gift"), color: "text-emerald-500" },
+    { id: 2, title: "Category Expert", icon: <Award className="w-8 h-8" />, unlocked: sharedCount >= 3 || profile?.badges?.includes("Category Expert"), color: "text-blue-500" },
+    { id: 3, title: "Neighbor of the Month", icon: <Star className="w-8 h-8" />, unlocked: karma > 100 || profile?.badges?.includes("Neighbor of the Month"), color: "text-amber-500" },
+    { id: 4, title: "Eco Hero", icon: <HandHeart className="w-8 h-8" />, unlocked: karma > 150 || profile?.badges?.includes("Eco Hero"), color: "text-primary" },
+    { id: 5, title: "100 Karma Club", icon: <Award className="w-8 h-8" />, unlocked: karma >= 100 || profile?.badges?.includes("100 Karma Club"), color: "text-purple-500" },
   ];
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await uploadImageMutation.mutateAsync(file);
+      await updateProfileMutation.mutateAsync({
+        avatar_url: res.url,
+      });
+      toast.success("Profile avatar updated!");
+    } catch (err: any) {
+      toast.error("Failed to upload avatar image.");
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +92,8 @@ export default function ProfilePage() {
         full_name: fullName,
         phone_number: phone,
         location: location,
+        latitude,
+        longitude,
       });
       toast.success("Profile updated successfully!");
     } catch (err: any) {
@@ -77,11 +109,23 @@ export default function ProfilePage() {
         
         {/* Header & Avatar */}
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-12">
-          <div className="relative">
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-background shadow-xl bg-muted flex items-center justify-center">
-              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80" alt={profile?.full_name} className="w-full h-full object-cover" />
+          <div className="relative group">
+            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-background shadow-xl bg-muted flex items-center justify-center relative">
+              <img src={getImageUrl(profile?.avatar_url)} alt={profile?.full_name} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                <Camera className="w-6 h-6 text-white" />
+              </div>
             </div>
-            <div className="absolute -bottom-2 -right-2 bg-secondary text-secondary-foreground px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1 font-bold border-2 border-background">
+            <input 
+              type="file" 
+              accept="image/*"
+              className="hidden" 
+              id="avatar-input" 
+              onChange={handleAvatarUpload}
+              disabled={uploadImageMutation.isPending}
+            />
+            <label htmlFor="avatar-input" className="absolute inset-0 cursor-pointer rounded-full" />
+            <div className="absolute -bottom-2 -right-2 bg-secondary text-secondary-foreground px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1 font-bold border-2 border-background z-10">
               <Star className="w-4 h-4" /> {karma}
             </div>
           </div>
@@ -199,7 +243,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-muted-foreground">Location</label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -211,6 +255,15 @@ export default function ProfilePage() {
                       required
                     />
                   </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowMapModal(true)}
+                    className="w-full mt-2 py-4 rounded-xl border-dashed border-primary/40 hover:border-primary text-primary flex items-center justify-center gap-2 text-xs font-semibold"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    {latitude && longitude ? "Change location on Map" : "Select location on Map"}
+                  </Button>
                 </div>
 
                 <div className="space-y-2 pt-2 border-t border-border mt-4">
@@ -241,6 +294,32 @@ export default function ProfilePage() {
 
         </div>
       </main>
+
+      {showMapModal && (
+        <YandexMapModal
+          initialLat={latitude}
+          initialLng={longitude}
+          initialAddress={location}
+          onClose={() => setShowMapModal(false)}
+          onSelect={(lat, lng, addr) => {
+            setLatitude(lat);
+            setLongitude(lng);
+            setLocation(addr);
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      </div>
+    }>
+      <ProfileContent />
+    </Suspense>
   );
 }

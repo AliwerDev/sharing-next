@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { Navigation } from "@/components/Navigation";
 import { ChevronLeft, Flag, Star, MapPin, CheckCircle2, Phone, Heart, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { useParams } from "next/navigation";
 import { ReportModal } from "@/components/ReportModal";
 import { useGetItemById, useGetProfile, useGetMyRequests, useCreateRequest } from "@/api/hooks";
 import { toast } from "sonner";
+import { ItemLocationMap } from "@/components/ItemLocationMap";
 
 function getImageUrl(url?: string) {
   if (!url) return "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=1200&q=80";
@@ -19,7 +20,7 @@ function getImageUrl(url?: string) {
   return url;
 }
 
-export default function ItemViewPage() {
+function ItemViewContent() {
   const params = useParams();
   const id = params?.id as string;
 
@@ -200,6 +201,17 @@ export default function ItemViewPage() {
               </div>
             </div>
 
+            {/* Approximate Location Map */}
+            {item.user?.latitude && item.user?.longitude && (
+              <div className="mb-8">
+                <ItemLocationMap
+                  latitude={item.user.latitude}
+                  longitude={item.user.longitude}
+                  locationName={item.user.location}
+                />
+              </div>
+            )}
+
             {/* Sticky Action Footer (Mobile) / Normal Flow (Desktop) */}
             <div className="mt-auto fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t border-border md:static md:p-0 md:bg-transparent md:border-t-0 md:backdrop-blur-none z-40">
               
@@ -282,5 +294,26 @@ export default function ItemViewPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function ItemViewPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col bg-background">
+        <header className="sticky top-0 z-50 glass-effect border-b border-border h-16 flex items-center px-4 sm:px-6 justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-primary/20" />
+            <span className="font-bold text-xl tracking-tight hidden sm:block opacity-50">ShareFlow</span>
+          </div>
+        </header>
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+          <p className="text-muted-foreground">Loading item details...</p>
+        </div>
+      </div>
+    }>
+      <ItemViewContent />
+    </Suspense>
   );
 }

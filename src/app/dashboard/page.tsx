@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Star, MapPin, Check, X, Bell, Package, ChevronRight, Handshake, Loader2, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ function getImageUrl(url?: string) {
   return url;
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const [activeTab, setActiveTab] = useState<"shares" | "requests">("shares");
   const [selectedListing, setSelectedListing] = useState<string | null>(null);
   const [selectedHandoverRequest, setSelectedHandoverRequest] = useState<string | null>(null);
@@ -300,5 +300,17 @@ export default function DashboardPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }

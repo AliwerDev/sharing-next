@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, Suspense } from "react";
 import { Navigation } from "@/components/Navigation";
 import { UploadCloud, X, MapPin, CheckCircle, Leaf, ArrowRight, ChevronLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ function getImageUrl(url?: string) {
   return url;
 }
 
-export default function ShareWizardPage() {
+function ShareWizardContent() {
   const [step, setStep] = useState(1);
   const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState("");
@@ -46,7 +46,7 @@ export default function ShareWizardPage() {
       for (const file of files) {
         try {
           const res = await uploadImageMutation.mutateAsync(file);
-          setImages(prev => [...prev, res.url]);
+          setImages((prev) => [...prev, res.url]);
           toast.success(`Uploaded ${file.name} successfully`);
         } catch (err: any) {
           toast.error(`Failed to upload ${file.name}`);
@@ -76,7 +76,10 @@ export default function ShareWizardPage() {
         setShowKarmaModal(true);
       } catch (err: any) {
         setIsSubmitting(false);
-        toast.error(err.response?.data?.message || "Failed to publish listing. Please try again.");
+        toast.error(
+          err.response?.data?.message ||
+            "Failed to publish listing. Please try again."
+        );
       }
     }
   };
@@ -85,16 +88,22 @@ export default function ShareWizardPage() {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background p-4 animate-in fade-in duration-500">
         <div className="absolute inset-0 bg-primary/5 pointer-events-none" />
-        
+
         {/* Floating leaves animation effect using Tailwind arbitrary values */}
-        <div className="absolute top-1/4 left-1/4 w-4 h-4 text-primary animate-bounce delay-100"><Leaf /></div>
-        <div className="absolute top-1/3 right-1/4 w-6 h-6 text-primary animate-bounce delay-300"><Leaf /></div>
-        <div className="absolute bottom-1/3 left-1/3 w-5 h-5 text-primary animate-bounce delay-700"><Leaf /></div>
+        <div className="absolute top-1/4 left-1/4 w-4 h-4 text-primary animate-bounce delay-100">
+          <Leaf />
+        </div>
+        <div className="absolute top-1/3 right-1/4 w-6 h-6 text-primary animate-bounce delay-300">
+          <Leaf />
+        </div>
+        <div className="absolute bottom-1/3 left-1/3 w-5 h-5 text-primary animate-bounce delay-700">
+          <Leaf />
+        </div>
 
         <div className="w-24 h-24 bg-primary text-primary-foreground rounded-full flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(var(--color-emerald-500),0.4)]">
           <CheckCircle className="w-12 h-12" />
         </div>
-        
+
         <h1 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-emerald-500 to-emerald-700 bg-clip-text text-transparent">
           Thank you for giving back!
         </h1>
@@ -117,9 +126,11 @@ export default function ShareWizardPage() {
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-8">
         <div className="flex items-center gap-4 mb-8">
-          <button 
+          <button
             type="button"
-            onClick={() => step > 1 ? setStep(step - 1) : window.history.back()}
+            onClick={() =>
+              step > 1 ? setStep(step - 1) : window.history.back()
+            }
             className="p-2 rounded-full hover:bg-accent transition-colors"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -132,20 +143,24 @@ export default function ShareWizardPage() {
 
         {/* Progress Bar */}
         <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-12">
-          <div 
+          <div
             className="h-full bg-primary transition-all duration-500 ease-out"
             style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8 glass-effect p-6 md:p-10 rounded-3xl card-elevation">
-          
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-8 glass-effect p-6 md:p-10 rounded-3xl card-elevation"
+        >
           {step === 1 && (
             <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
               <h2 className="text-xl font-semibold">Upload Photos</h2>
-              <p className="text-sm text-muted-foreground">Add up to 5 clear photos of the item. Good photos build trust!</p>
-              
-              <div 
+              <p className="text-sm text-muted-foreground">
+                Add up to 5 clear photos of the item. Good photos build trust!
+              </p>
+
+              <div
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full h-48 border-2 border-dashed border-primary/30 rounded-2xl flex flex-col items-center justify-center bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer"
               >
@@ -154,24 +169,35 @@ export default function ShareWizardPage() {
                 ) : (
                   <UploadCloud className="w-10 h-10 text-primary mb-3" />
                 )}
-                <span className="font-medium">Tap or drag to upload photos</span>
-                <span className="text-xs text-muted-foreground mt-1">JPEG, PNG up to 5MB</span>
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  onChange={handleImageUpload} 
-                  multiple 
-                  accept="image/*" 
-                  className="hidden" 
+                <span className="font-medium">
+                  Tap or drag to upload photos
+                </span>
+                <span className="text-xs text-muted-foreground mt-1">
+                  JPEG, PNG up to 5MB
+                </span>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  multiple
+                  accept="image/*"
+                  className="hidden"
                 />
               </div>
 
               {images.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
                   {images.map((src, idx) => (
-                    <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group">
-                      <img src={getImageUrl(src)} alt="Upload preview" className="w-full h-full object-cover" />
-                      <button 
+                    <div
+                      key={idx}
+                      className="relative aspect-square rounded-xl overflow-hidden group"
+                    >
+                      <img
+                        src={getImageUrl(src)}
+                        alt="Upload preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
                         type="button"
                         onClick={() => removeImage(idx)}
                         className="absolute top-2 right-2 w-7 h-7 bg-black/50 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
@@ -188,14 +214,14 @@ export default function ShareWizardPage() {
           {step === 2 && (
             <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
               <h2 className="text-xl font-semibold">Item Details</h2>
-              
+
               <div className="space-y-2">
                 <label className="block text-sm font-medium">Title</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., Ceramic Plant Pots (Set of 3)" 
+                  placeholder="e.g., Ceramic Plant Pots (Set of 3)"
                   className="w-full px-4 py-3 bg-input-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                   required
                 />
@@ -203,25 +229,29 @@ export default function ShareWizardPage() {
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium">Category</label>
-                <select 
+                <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-4 py-3 bg-input-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                   required
                 >
-                  <option value="" disabled>Select a category...</option>
+                  <option value="" disabled>
+                    Select a category...
+                  </option>
                   {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium">Description</label>
-                <textarea 
+                <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe the condition, size, and why you are giving it away..." 
+                  placeholder="Describe the condition, size, and why you are giving it away..."
                   rows={5}
                   className="w-full px-4 py-3 bg-input-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-all resize-none"
                   required
@@ -233,7 +263,9 @@ export default function ShareWizardPage() {
           {step === 3 && (
             <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
               <h2 className="text-xl font-semibold">Confirm Location</h2>
-              <p className="text-sm text-muted-foreground">Where should the requester come to pick this up?</p>
+              <p className="text-sm text-muted-foreground">
+                Where should the requester come to pick this up?
+              </p>
 
               <div className="glass-effect rounded-2xl p-4 border border-border">
                 <div className="flex items-center gap-3 text-lg font-medium mb-4">
@@ -241,7 +273,9 @@ export default function ShareWizardPage() {
                   {location}
                 </div>
                 <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                  <span className="text-sm text-muted-foreground">Use my default neighborhood</span>
+                  <span className="text-sm text-muted-foreground">
+                    Use my default neighborhood
+                  </span>
                   {/* Mock Toggle */}
                   <div className="w-12 h-6 bg-primary rounded-full relative cursor-pointer">
                     <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full" />
@@ -252,24 +286,46 @@ export default function ShareWizardPage() {
           )}
 
           <div className="pt-6 border-t border-border mt-8 flex justify-end">
-            <Button 
-              type="submit" 
-              disabled={isSubmitting || (step === 1 && images.length === 0) || (step === 2 && (!title || !description || !category))}
+            <Button
+              type="submit"
+              disabled={
+                isSubmitting ||
+                (step === 1 && images.length === 0) ||
+                (step === 2 && (!title || !description || !category))
+              }
               className="py-6 px-8 rounded-xl text-lg shadow-md hover-lift tactile-scale gap-2"
             >
               {isSubmitting ? (
-                <>Publishing... <Loader2 className="w-5 h-5 animate-spin" /></>
+                <>
+                  Publishing... <Loader2 className="w-5 h-5 animate-spin" />
+                </>
               ) : step === 3 ? (
-                <>Publish Listing <CheckCircle className="w-5 h-5" /></>
+                <>
+                  Publish Listing <CheckCircle className="w-5 h-5" />
+                </>
               ) : (
-                <>Next Step <ArrowRight className="w-5 h-5" /></>
+                <>
+                  Next Step <ArrowRight className="w-5 h-5" />
+                </>
               )}
             </Button>
           </div>
-
         </form>
-
       </main>
     </div>
+  );
+}
+
+export default function ShareWizardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        </div>
+      }
+    >
+      <ShareWizardContent />
+    </Suspense>
   );
 }

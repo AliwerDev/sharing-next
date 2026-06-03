@@ -19,6 +19,10 @@ export interface User {
   location: string;
   karma_points: number;
   role: 'user' | 'admin';
+  avatar_url?: string;
+  latitude?: number;
+  longitude?: number;
+  badges?: string[];
   created_at: string;
 }
 
@@ -33,6 +37,7 @@ export interface Item {
   category?: Category;
   images?: ItemImage[];
   user?: User;
+  distance?: string | null;
 }
 
 export interface Request {
@@ -71,7 +76,7 @@ export const useGetCategories = () => {
 /**
  * Fetch all active items with optional filters
  */
-export const useGetActiveItems = (filters?: { search?: string; category_id?: string }) => {
+export const useGetActiveItems = (filters?: { search?: string; category_id?: string; latitude?: string; longitude?: string }) => {
   return useQuery({
     queryKey: ['items', 'active', filters],
     queryFn: async () => {
@@ -80,6 +85,8 @@ export const useGetActiveItems = (filters?: { search?: string; category_id?: str
       if (filters?.category_id && filters.category_id !== 'all') {
         params.append('category_id', filters.category_id);
       }
+      if (filters?.latitude) params.append('latitude', filters.latitude);
+      if (filters?.longitude) params.append('longitude', filters.longitude);
       const { data } = await apiClient.get<{ data: Item[]; meta: any }>(`/items?${params.toString()}`);
       return data.data;
     },
@@ -118,7 +125,14 @@ export const useGetItemById = (id: string) => {
  */
 export const useRegister = () => {
   return useMutation({
-    mutationFn: async (userData: { phone_number: string; password: string; full_name?: string; location?: string }) => {
+    mutationFn: async (userData: { 
+      phone_number: string; 
+      password: string; 
+      full_name?: string; 
+      location?: string;
+      latitude?: number;
+      longitude?: number;
+    }) => {
       const { data } = await apiClient.post('/auth/register', userData);
       return data;
     },
@@ -242,7 +256,15 @@ export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (updatedData: { full_name?: string; phone_number?: string; location?: string }) => {
+    mutationFn: async (updatedData: { 
+      full_name?: string; 
+      phone_number?: string; 
+      location?: string;
+      avatar_url?: string;
+      latitude?: number;
+      longitude?: number;
+      badges?: string[];
+    }) => {
       const { data } = await apiClient.patch<User>('/users/me', updatedData);
       return data;
     },
@@ -260,6 +282,97 @@ export const useCreateReport = () => {
     mutationFn: async (body: { item_id: string; reason: string }) => {
       const { data } = await apiClient.post<Report>('/reports', body);
       return data;
+    },
+  });
+};
+
+/**
+ * Fetch all reports (Admin only)
+ */
+export const useGetReports = () => {
+  return useQuery({
+    queryKey: ['reports'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<any[]>('/reports');
+      return data;
+    },
+  });
+};
+
+/**
+ * Delete/dismiss a report (Admin only)
+ */
+export const useDeleteReport = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/reports/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
+    },
+  });
+};
+
+/**
+ * Delete a listing (Owner or Admin)
+ */
+export const useDeleteItem = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/items/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
+    },
+  });
+};
+
+/**
+ * Create a category (Admin only)
+ */
+export const useCreateCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: { name: string }) => {
+      const { data } = await apiClient.post<Category>('/categories', body);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+  });
+};
+
+/**
+ * Update a category (Admin only)
+ */
+export const useUpdateCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      const { data } = await apiClient.patch<Category>(`/categories/${id}`, { name });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+  });
+};
+
+/**
+ * Delete a category (Admin only)
+ */
+export const useDeleteCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/categories/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
     },
   });
 };
