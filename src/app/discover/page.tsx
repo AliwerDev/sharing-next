@@ -48,9 +48,22 @@ export default function DiscoverPage() {
             </div>
           ) : items.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {items.map((item: any) => (
-                <ItemCard key={item.id} {...item} />
-              ))}
+              {items.map((item: any) => {
+                const cardProps = {
+                  id: item.id,
+                  title: item.title,
+                  category: typeof item.category === 'object' ? item.category?.name : item.category || 'Other',
+                  imageUrl: item.images?.[0]?.image_url || "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&q=80",
+                  distance: item.distance || "0.8 km",
+                  status: item.status,
+                  owner: {
+                    name: item.user?.full_name || "Neighbor",
+                    karma: item.user?.karma_points || 15,
+                    avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80"
+                  }
+                };
+                return <ItemCard key={item.id} {...cardProps} />;
+              })}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center text-center py-20 px-4 glass-effect rounded-3xl border-dashed">

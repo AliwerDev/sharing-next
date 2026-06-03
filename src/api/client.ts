@@ -4,7 +4,7 @@ import axios from 'axios';
 const apiClient = axios.create({
   // Point to the Next.js API routes or the backend URL
   // If the backend is running separately (e.g., on port 3001), change this to 'http://localhost:3001/api' or use env vars
-  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
   headers: {
     'Content-Type': 'application/json',
   },

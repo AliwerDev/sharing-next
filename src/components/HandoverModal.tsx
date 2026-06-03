@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { Star, Share2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import confetti from "canvas-confetti";
 
 export function HandoverModal({ onClose }: { onClose: () => void }) {
   const [karma, setKarma] = useState(180);
@@ -18,21 +17,6 @@ export function HandoverModal({ onClose }: { onClose: () => void }) {
     const end = Date.now() + duration;
 
     const frame = () => {
-      confetti({
-        particleCount: 5,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ["#10b981", "#fbbf24"],
-      });
-      confetti({
-        particleCount: 5,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ["#10b981", "#fbbf24"],
-      });
-
       if (Date.now() < end) {
         requestAnimationFrame(frame);
       }
@@ -88,7 +72,7 @@ export function HandoverModal({ onClose }: { onClose: () => void }) {
           </div>
           <p className="text-xs text-left mt-2 text-muted-foreground">
             <span className="font-medium text-foreground">10 points</span> left
-            to unlock 'Eco Hero' badge!
+            to unlock &quot;Eco Hero&quot; badge!
           </p>
         </div>
 

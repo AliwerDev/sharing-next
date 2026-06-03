@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Navigation } from "@/components/Navigation";
-import { Navigation as NavigationIcon, ChevronLeft, Flag, Star, MapPin, CheckCircle2, Phone } from "lucide-react";
+import { Navigation as NavigationIcon, ChevronLeft, Flag, Star, MapPin, CheckCircle2, Phone, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useParams } from "next/navigation";

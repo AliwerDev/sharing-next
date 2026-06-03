@@ -19,8 +19,8 @@ export const useGetActiveItems = () => {
   return useQuery({
     queryKey: ['items', 'active'],
     queryFn: async () => {
-      const { data } = await apiClient.get<Item[]>('/items?status=ACTIVE');
-      return data;
+      const { data } = await apiClient.get<{ data: Item[]; meta: any }>('/items?status=ACTIVE');
+      return data.data;
     },
   });
 };
