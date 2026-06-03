@@ -1,21 +1,39 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import { Laptop, Shirt, Book, ToyBrick, Home, Music, ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useRef } from "react";
+import { Laptop, Shirt, Book, ToyBrick, Home, Music, HeartHandshake, ChevronLeft, ChevronRight } from "lucide-react";
+import { useGetCategories } from "@/api/hooks";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
-const CATEGORIES = [
-  { id: "all", name: "All Items", icon: null },
-  { id: "electronics", name: "Electronics", icon: <Laptop className="w-4 h-4" /> },
-  { id: "clothes", name: "Clothes", icon: <Shirt className="w-4 h-4" /> },
-  { id: "books", name: "Books", icon: <Book className="w-4 h-4" /> },
-  { id: "toys", name: "Toys", icon: <ToyBrick className="w-4 h-4" /> },
-  { id: "household", name: "Household", icon: <Home className="w-4 h-4" /> },
-  { id: "music", name: "Music", icon: <Music className="w-4 h-4" /> },
-];
+function getCategoryIcon(name: string) {
+  const norm = name.toLowerCase();
+  if (norm.includes('electronics')) return <Laptop className="w-4 h-4" />;
+  if (norm.includes('clothing') || norm.includes('clothes')) return <Shirt className="w-4 h-4" />;
+  if (norm.includes('book')) return <Book className="w-4 h-4" />;
+  if (norm.includes('toy') || norm.includes('game')) return <ToyBrick className="w-4 h-4" />;
+  if (norm.includes('home') || norm.includes('kitchen') || norm.includes('household')) return <Home className="w-4 h-4" />;
+  if (norm.includes('sport') || norm.includes('music')) return <Music className="w-4 h-4" />;
+  return <HeartHandshake className="w-4 h-4" />;
+}
 
 export function CategoryCarousel() {
-  const [activeId, setActiveId] = useState("all");
+  const { data: categories = [] } = useGetCategories();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const activeId = searchParams.get("category_id") || "all";
+
+  const handleCategorySelect = (id: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (id === "all") {
+      params.delete("category_id");
+    } else {
+      params.set("category_id", id);
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -26,6 +44,8 @@ export function CategoryCarousel() {
       });
     }
   };
+
+  const allCategories = [{ id: "all", name: "All Items" }, ...categories];
 
   return (
     <div className="relative group/carousel">
@@ -52,19 +72,19 @@ export function CategoryCarousel() {
         className="flex overflow-x-auto hide-scrollbar gap-3 py-2 px-1 md:px-8 snap-x"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {CATEGORIES.map((category) => {
+        {allCategories.map((category) => {
           const isActive = activeId === category.id;
           return (
             <button
               key={category.id}
-              onClick={() => setActiveId(category.id)}
+              onClick={() => handleCategorySelect(category.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all tactile-scale snap-start shadow-sm border ${
                 isActive
                   ? "bg-primary text-primary-foreground border-primary"
                   : "glass-effect text-foreground border-transparent hover:bg-accent hover:text-accent-foreground"
               }`}
             >
-              {category.icon}
+              {category.id !== "all" && getCategoryIcon(category.name)}
               <span className="text-sm font-medium">{category.name}</span>
             </button>
           );

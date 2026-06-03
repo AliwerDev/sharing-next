@@ -1,32 +1,73 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
-import { Star, MapPin, Award, Gift, HandHeart, Calendar, Lock, User, Phone } from "lucide-react";
+import { Star, MapPin, Award, Gift, HandHeart, Calendar, Lock, User as UserIcon, Phone, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useGetProfile, useUpdateProfile, useGetMyItems, useGetMyRequests } from "@/api/hooks";
+import { toast } from "sonner";
 
 export default function ProfilePage() {
-  const user = {
-    name: "Jane Doe",
-    location: "Downtown, Block 4",
-    phone: "+998 90 123 4567",
-    memberSince: "May 2026",
-    karma: 180,
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
-    stats: {
-      shared: 24,
-      received: 12,
-      activeRequests: 5
+  // Queries
+  const { data: profile, isLoading: isProfileLoading } = useGetProfile();
+  const { data: myShares = [] } = useGetMyItems();
+  const { data: myRequests = [] } = useGetMyRequests();
+
+  // Mutations
+  const updateProfileMutation = useUpdateProfile();
+
+  // Form states
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
+  const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name || "");
+      setPhone(profile.phone_number || "");
+      setLocation(profile.location || "");
     }
-  };
+  }, [profile]);
+
+  if (isProfileLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Navigation />
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+          <p className="text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const karma = profile?.karma_points || 0;
+  const sharedCount = myShares.length;
+  const receivedCount = myRequests.filter((r) => r.status === "COMPLETED").length;
+  const activeRequestsCount = myRequests.filter((r) => r.status === "PENDING" || r.status === "APPROVED").length;
 
   const achievements = [
-    { id: 1, title: "First Gift", icon: <Gift className="w-8 h-8" />, unlocked: true, color: "text-emerald-500" },
-    { id: 2, title: "Category Expert", icon: <Award className="w-8 h-8" />, unlocked: true, color: "text-blue-500" },
-    { id: 3, title: "Neighbor of the Month", icon: <Star className="w-8 h-8" />, unlocked: true, color: "text-amber-500" },
-    { id: 4, title: "Eco Hero", icon: <HandHeart className="w-8 h-8" />, unlocked: false, color: "text-primary" },
-    { id: 5, title: "100 Karma Club", icon: <Award className="w-8 h-8" />, unlocked: true, color: "text-purple-500" },
+    { id: 1, title: "First Gift", icon: <Gift className="w-8 h-8" />, unlocked: sharedCount >= 1, color: "text-emerald-500" },
+    { id: 2, title: "Category Expert", icon: <Award className="w-8 h-8" />, unlocked: sharedCount >= 3, color: "text-blue-500" },
+    { id: 3, title: "Neighbor of the Month", icon: <Star className="w-8 h-8" />, unlocked: karma > 100, color: "text-amber-500" },
+    { id: 4, title: "Eco Hero", icon: <HandHeart className="w-8 h-8" />, unlocked: karma > 150, color: "text-primary" },
+    { id: 5, title: "100 Karma Club", icon: <Award className="w-8 h-8" />, unlocked: karma >= 100, color: "text-purple-500" },
   ];
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await updateProfileMutation.mutateAsync({
+        full_name: fullName,
+        phone_number: phone,
+        location: location,
+      });
+      toast.success("Profile updated successfully!");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to update profile.");
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -37,22 +78,22 @@ export default function ProfilePage() {
         {/* Header & Avatar */}
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-12">
           <div className="relative">
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-background shadow-xl">
-              <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-background shadow-xl bg-muted flex items-center justify-center">
+              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80" alt={profile?.full_name} className="w-full h-full object-cover" />
             </div>
             <div className="absolute -bottom-2 -right-2 bg-secondary text-secondary-foreground px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1 font-bold border-2 border-background">
-              <Star className="w-4 h-4" /> {user.karma}
+              <Star className="w-4 h-4" /> {karma}
             </div>
           </div>
           
           <div className="flex-1 text-center md:text-left mt-4 md:mt-0">
-            <h1 className="text-4xl font-bold mb-2">{user.name}</h1>
+            <h1 className="text-4xl font-bold mb-2">{profile?.full_name}</h1>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-muted-foreground">
               <div className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-full text-sm font-medium">
-                <MapPin className="w-4 h-4" /> {user.location}
+                <MapPin className="w-4 h-4" /> {profile?.location || "No location set"}
               </div>
               <div className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-full text-sm font-medium">
-                <Calendar className="w-4 h-4" /> Member since {user.memberSince}
+                <Calendar className="w-4 h-4" /> Member since {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : "recently"}
               </div>
             </div>
           </div>
@@ -68,19 +109,19 @@ export default function ProfilePage() {
               <h2 className="text-2xl font-bold mb-6">Your Impact</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="glass-effect rounded-2xl p-6 text-center hover-lift transition-all">
-                  <div className="text-3xl font-black bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent mb-1">{user.karma}</div>
+                  <div className="text-3xl font-black bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent mb-1">{karma}</div>
                   <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Karma Points</div>
                 </div>
                 <div className="glass-effect rounded-2xl p-6 text-center hover-lift transition-all">
-                  <div className="text-3xl font-black text-primary mb-1">{user.stats.shared}</div>
+                  <div className="text-3xl font-black text-primary mb-1">{sharedCount}</div>
                   <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Items Shared</div>
                 </div>
                 <div className="glass-effect rounded-2xl p-6 text-center hover-lift transition-all">
-                  <div className="text-3xl font-black text-blue-500 mb-1">{user.stats.received}</div>
+                  <div className="text-3xl font-black text-blue-500 mb-1">{receivedCount}</div>
                   <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Items Received</div>
                 </div>
                 <div className="glass-effect rounded-2xl p-6 text-center hover-lift transition-all">
-                  <div className="text-3xl font-black text-foreground mb-1">{user.stats.activeRequests}</div>
+                  <div className="text-3xl font-black text-foreground mb-1">{activeRequestsCount}</div>
                   <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Active Requests</div>
                 </div>
               </div>
@@ -129,15 +170,17 @@ export default function ProfilePage() {
             <div className="glass-effect rounded-3xl p-6 border border-border sticky top-24">
               <h2 className="text-xl font-bold mb-6">Profile Settings</h2>
               
-              <form className="space-y-4">
+              <form onSubmit={handleSave} className="space-y-4">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-muted-foreground">Full Name</label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input 
                       type="text" 
-                      defaultValue={user.name}
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 bg-input-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+                      required
                     />
                   </div>
                 </div>
@@ -148,8 +191,10 @@ export default function ProfilePage() {
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input 
                       type="tel" 
-                      defaultValue={user.phone}
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 bg-input-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+                      required
                     />
                   </div>
                 </div>
@@ -160,8 +205,10 @@ export default function ProfilePage() {
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input 
                       type="text" 
-                      defaultValue={user.location}
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 bg-input-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+                      required
                     />
                   </div>
                 </div>
@@ -173,13 +220,20 @@ export default function ProfilePage() {
                     <input 
                       type="password" 
                       placeholder="New password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 bg-input-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+                      disabled
                     />
                   </div>
                 </div>
 
-                <Button className="w-full mt-6 rounded-xl hover-lift tactile-scale">
-                  Save Changes
+                <Button 
+                  type="submit"
+                  disabled={updateProfileMutation.isPending}
+                  className="w-full mt-6 rounded-xl hover-lift tactile-scale"
+                >
+                  {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
                 </Button>
               </form>
             </div>

@@ -4,11 +4,14 @@ import React, { useState } from "react";
 import { X, AlertTriangle, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useCreateReport } from "@/api/hooks";
 
-export function ReportModal({ onClose }: { onClose: () => void }) {
+export function ReportModal({ itemId, onClose }: { itemId: string; onClose: () => void }) {
   const [selectedReason, setSelectedReason] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const createReportMutation = useCreateReport();
 
   const REASONS = [
     "Commercial/Not Free",
@@ -18,18 +21,24 @@ export function ReportModal({ onClose }: { onClose: () => void }) {
     "Other"
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Mock API
-    setTimeout(() => {
+    try {
+      await createReportMutation.mutateAsync({
+        item_id: itemId,
+        reason: `${selectedReason}${notes ? ` - ${notes}` : ""}`,
+      });
       setIsSubmitting(false);
       toast.success("Report Submitted", {
         description: "Thank you for helping keep ShareFlow safe. Our moderation team will review this shortly."
       });
       onClose();
-    }, 1000);
+    } catch (err: any) {
+      setIsSubmitting(false);
+      toast.error(err.response?.data?.message || "Failed to submit report. Please try again.");
+    }
   };
 
   return (

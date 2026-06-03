@@ -1,32 +1,106 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from './client';
 
-// --- Types (Can be moved to a separate types file) ---
+// --- Types ---
+export interface Category {
+  id: string;
+  name: string;
+}
+
+export interface ItemImage {
+  id: string;
+  image_url: string;
+}
+
+export interface User {
+  id: string;
+  full_name: string;
+  phone_number?: string;
+  location: string;
+  karma_points: number;
+  role: 'user' | 'admin';
+  created_at: string;
+}
+
 export interface Item {
   id: string;
   title: string;
   description: string;
   status: 'ACTIVE' | 'RESERVED' | 'GIVEN' | 'DELETED';
-  // Add other fields based on your Prisma schema
+  category_id: string;
+  user_id: string;
+  created_at: string;
+  category?: Category;
+  images?: ItemImage[];
+  user?: User;
+}
+
+export interface Request {
+  id: string;
+  item_id: string;
+  requester_id: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
+  created_at: string;
+  item?: Item;
+  requester?: User;
+}
+
+export interface Report {
+  id: string;
+  item_id: string;
+  reporter_id: string;
+  reason: string;
+  created_at: string;
 }
 
 // --- Hooks ---
 
 /**
- * Hook to fetch all active items (for Discovery Feed)
+ * Fetch all categories
  */
-export const useGetActiveItems = () => {
+export const useGetCategories = () => {
   return useQuery({
-    queryKey: ['items', 'active'],
+    queryKey: ['categories'],
     queryFn: async () => {
-      const { data } = await apiClient.get<{ data: Item[]; meta: any }>('/items?status=ACTIVE');
+      const { data } = await apiClient.get<Category[]>('/categories');
+      return data;
+    },
+  });
+};
+
+/**
+ * Fetch all active items with optional filters
+ */
+export const useGetActiveItems = (filters?: { search?: string; category_id?: string }) => {
+  return useQuery({
+    queryKey: ['items', 'active', filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters?.search) params.append('search', filters.search);
+      if (filters?.category_id && filters.category_id !== 'all') {
+        params.append('category_id', filters.category_id);
+      }
+      const { data } = await apiClient.get<{ data: Item[]; meta: any }>(`/items?${params.toString()}`);
       return data.data;
     },
   });
 };
 
 /**
- * Hook to fetch a single item by ID
+ * Fetch my items (shares)
+ */
+export const useGetMyItems = () => {
+  return useQuery({
+    queryKey: ['items', 'my'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<Item[]>('/items/my');
+      return data;
+    },
+  });
+};
+
+/**
+ * Fetch a single item by ID
  */
 export const useGetItemById = (id: string) => {
   return useQuery({
@@ -35,7 +109,7 @@ export const useGetItemById = (id: string) => {
       const { data } = await apiClient.get<Item>(`/items/${id}`);
       return data;
     },
-    enabled: !!id, // Only run the query if an ID is provided
+    enabled: !!id,
   });
 };
 
@@ -58,13 +132,134 @@ export const useCreateItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newItem: Omit<Item, 'id' | 'status'>) => {
+    mutationFn: async (newItem: { title: string; description: string; category_id: string; images?: string[] }) => {
       const { data } = await apiClient.post<Item>('/items', newItem);
       return data;
     },
     onSuccess: () => {
-      // Invalidate and refetch items list after a successful creation
       queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+  });
+};
+
+/**
+ * Upload an image file
+ */
+export const useUploadImage = () => {
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const { data } = await apiClient.post<{ url: string }>('/uploads', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return data;
+    },
+  });
+};
+
+/**
+ * Fetch my sent requests
+ */
+export const useGetMyRequests = () => {
+  return useQuery({
+    queryKey: ['requests', 'my'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<Request[]>('/requests/my');
+      return data;
+    },
+  });
+};
+
+/**
+ * Fetch incoming requests for my items
+ */
+export const useGetIncomingRequests = () => {
+  return useQuery({
+    queryKey: ['requests', 'incoming'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<Request[]>('/requests/incoming');
+      return data;
+    },
+  });
+};
+
+/**
+ * Request an item
+ */
+export const useCreateRequest = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (body: { item_id: string }) => {
+      const { data } = await apiClient.post<Request>('/requests', body);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['requests'] });
+    },
+  });
+};
+
+/**
+ * Update request status (approve/reject/complete)
+ */
+export const useUpdateRequestStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: Request['status'] }) => {
+      const { data } = await apiClient.patch<Request>(`/requests/${id}/status`, { status });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['requests'] });
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+  });
+};
+
+/**
+ * Fetch profile details of authenticated user
+ */
+export const useGetProfile = () => {
+  return useQuery({
+    queryKey: ['profile', 'me'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<User>('/users/me');
+      return data;
+    },
+  });
+};
+
+/**
+ * Update user profile details
+ */
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (updatedData: { full_name?: string; phone_number?: string; location?: string }) => {
+      const { data } = await apiClient.patch<User>('/users/me', updatedData);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+  });
+};
+
+/**
+ * Create a report for an item
+ */
+export const useCreateReport = () => {
+  return useMutation({
+    mutationFn: async (body: { item_id: string; reason: string }) => {
+      const { data } = await apiClient.post<Report>('/reports', body);
+      return data;
     },
   });
 };

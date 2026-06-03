@@ -1,16 +1,31 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { Navigation } from "@/components/Navigation";
 import { CategoryCarousel } from "@/components/CategoryCarousel";
-import { ItemCard, ItemCardProps } from "@/components/ItemCard";
+import { ItemCard } from "@/components/ItemCard";
 import { Plus, Loader2, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useGetActiveItems } from "@/api/hooks";
+import { useSearchParams } from "next/navigation";
 
-export default function DiscoverPage() {
-  const { data: items = [], isLoading, error } = useGetActiveItems();
+function getImageUrl(url?: string) {
+  if (!url) return "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&q=80";
+  if (url.startsWith('/uploads')) {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    return `${backendUrl}${url}`;
+  }
+  return url;
+}
+
+function DiscoverContent() {
+  const searchParams = useSearchParams();
+  const search = searchParams.get("search") || undefined;
+  const category_id = searchParams.get("category_id") || undefined;
+
+  const { data: items = [], isLoading, error } = useGetActiveItems({ search, category_id });
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
@@ -53,7 +68,7 @@ export default function DiscoverPage() {
                   id: item.id,
                   title: item.title,
                   category: typeof item.category === 'object' ? item.category?.name : item.category || 'Other',
-                  imageUrl: item.images?.[0]?.image_url || "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&q=80",
+                  imageUrl: getImageUrl(item.images?.[0]?.image_url),
                   distance: item.distance || "0.8 km",
                   status: item.status,
                   owner: {
@@ -84,5 +99,21 @@ export default function DiscoverPage() {
         </section>
       </main>
     </div>
+  );
+}
+
+export default function DiscoverPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col bg-background">
+        <Navigation />
+        <div className="flex-1 flex flex-col items-center justify-center py-20">
+          <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+          <p className="text-muted-foreground">Finding nearby items...</p>
+        </div>
+      </div>
+    }>
+      <DiscoverContent />
+    </Suspense>
   );
 }

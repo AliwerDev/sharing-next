@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getSession } from 'next-auth/react';
 
 // Create an Axios instance
 const apiClient = axios.create({
@@ -14,11 +15,11 @@ const apiClient = axios.create({
 // Request interceptor for API calls
 apiClient.interceptors.request.use(
   async (config) => {
-    // You can add auth tokens here if needed
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    // Fetch NextAuth session client-side
+    const session = await getSession();
+    if (session?.access_token) {
+      config.headers.Authorization = `Bearer ${session.access_token}`;
+    }
     return config;
   },
   (error) => {

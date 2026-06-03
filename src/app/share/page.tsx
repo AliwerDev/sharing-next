@@ -1,10 +1,21 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
-import { UploadCloud, X, MapPin, CheckCircle, Leaf, ArrowRight, ChevronLeft } from "lucide-react";
+import { UploadCloud, X, MapPin, CheckCircle, Leaf, ArrowRight, ChevronLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useGetCategories, useGetProfile, useUploadImage, useCreateItem } from "@/api/hooks";
+import { toast } from "sonner";
+
+function getImageUrl(url?: string) {
+  if (!url) return "";
+  if (url.startsWith('/uploads')) {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    return `${backendUrl}${url}`;
+  }
+  return url;
+}
 
 export default function ShareWizardPage() {
   const [step, setStep] = useState(1);
@@ -17,11 +28,30 @@ export default function ShareWizardPage() {
   const [showKarmaModal, setShowKarmaModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Queries & Mutations
+  const { data: categories = [] } = useGetCategories();
+  const { data: profile } = useGetProfile();
+  const uploadImageMutation = useUploadImage();
+  const createItemMutation = useCreateItem();
+
+  useEffect(() => {
+    if (profile?.location) {
+      setLocation(profile.location);
+    }
+  }, [profile]);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      // Mocking file upload by creating object URLs
-      const newImages = Array.from(e.target.files).map(file => URL.createObjectURL(file));
-      setImages(prev => [...prev, ...newImages]);
+      const files = Array.from(e.target.files);
+      for (const file of files) {
+        try {
+          const res = await uploadImageMutation.mutateAsync(file);
+          setImages(prev => [...prev, res.url]);
+          toast.success(`Uploaded ${file.name} successfully`);
+        } catch (err: any) {
+          toast.error(`Failed to upload ${file.name}`);
+        }
+      }
     }
   };
 
@@ -29,17 +59,25 @@ export default function ShareWizardPage() {
     setImages(images.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (step < 3) {
       setStep(step + 1);
     } else {
       setIsSubmitting(true);
-      // Mock API Call
-      setTimeout(() => {
+      try {
+        await createItemMutation.mutateAsync({
+          title,
+          description,
+          category_id: category,
+          images,
+        });
         setIsSubmitting(false);
         setShowKarmaModal(true);
-      }, 1500);
+      } catch (err: any) {
+        setIsSubmitting(false);
+        toast.error(err.response?.data?.message || "Failed to publish listing. Please try again.");
+      }
     }
   };
 
@@ -61,7 +99,7 @@ export default function ShareWizardPage() {
           Thank you for giving back!
         </h1>
         <p className="text-xl text-muted-foreground text-center max-w-md mb-12">
-          Your listing "{title}" is now live in your neighborhood.
+          Your listing &quot;{title}&quot; is now live in your neighborhood.
         </p>
 
         <Link href="/dashboard">
@@ -80,6 +118,7 @@ export default function ShareWizardPage() {
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-8">
         <div className="flex items-center gap-4 mb-8">
           <button 
+            type="button"
             onClick={() => step > 1 ? setStep(step - 1) : window.history.back()}
             className="p-2 rounded-full hover:bg-accent transition-colors"
           >
@@ -110,7 +149,11 @@ export default function ShareWizardPage() {
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full h-48 border-2 border-dashed border-primary/30 rounded-2xl flex flex-col items-center justify-center bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer"
               >
-                <UploadCloud className="w-10 h-10 text-primary mb-3" />
+                {uploadImageMutation.isPending ? (
+                  <Loader2 className="w-10 h-10 text-primary mb-3 animate-spin" />
+                ) : (
+                  <UploadCloud className="w-10 h-10 text-primary mb-3" />
+                )}
                 <span className="font-medium">Tap or drag to upload photos</span>
                 <span className="text-xs text-muted-foreground mt-1">JPEG, PNG up to 5MB</span>
                 <input 
@@ -127,7 +170,7 @@ export default function ShareWizardPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
                   {images.map((src, idx) => (
                     <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group">
-                      <img src={src} alt="Upload preview" className="w-full h-full object-cover" />
+                      <img src={getImageUrl(src)} alt="Upload preview" className="w-full h-full object-cover" />
                       <button 
                         type="button"
                         onClick={() => removeImage(idx)}
@@ -167,11 +210,9 @@ export default function ShareWizardPage() {
                   required
                 >
                   <option value="" disabled>Select a category...</option>
-                  <option value="electronics">Electronics</option>
-                  <option value="clothes">Clothes</option>
-                  <option value="books">Books</option>
-                  <option value="toys">Toys</option>
-                  <option value="household">Household</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
                 </select>
               </div>
 
@@ -217,7 +258,7 @@ export default function ShareWizardPage() {
               className="py-6 px-8 rounded-xl text-lg shadow-md hover-lift tactile-scale gap-2"
             >
               {isSubmitting ? (
-                "Publishing..."
+                <>Publishing... <Loader2 className="w-5 h-5 animate-spin" /></>
               ) : step === 3 ? (
                 <>Publish Listing <CheckCircle className="w-5 h-5" /></>
               ) : (
