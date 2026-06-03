@@ -11,6 +11,7 @@ import {
 import { AuthCard } from "@/components/AuthCard";
 import { InteractiveSimulator } from "@/components/InteractiveSimulator";
 import { useGetStats } from "@/api/hooks";
+import { useTranslations } from "next-intl";
 import { 
   Dialog, 
   DialogContent, 
@@ -26,6 +27,7 @@ import {
 } from "@/components/ui/accordion";
 
 export default function WelcomePage() {
+  const t = useTranslations();
   const { data: stats, isLoading } = useGetStats();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -89,19 +91,19 @@ export default function WelcomePage() {
           {/* Desktop Nav links */}
           <nav className="hidden md:flex items-center gap-8">
             <button onClick={() => scrollToSection("features")} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              Xususiyatlar
+              {t("navFeatures")}
             </button>
             <button onClick={() => scrollToSection("simulator")} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              Simulyator
+              {t("navSimulator")}
             </button>
             <button onClick={() => scrollToSection("stats")} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              Statistika
+              {t("navStats")}
             </button>
             <button onClick={() => scrollToSection("karma")} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              Karma Tizimi
+              {t("navKarmaSystem")}
             </button>
             <button onClick={() => scrollToSection("faq")} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              FAQ
+              {t("navFaq")}
             </button>
           </nav>
 
@@ -111,13 +113,13 @@ export default function WelcomePage() {
               onClick={() => setIsAuthModalOpen(true)}
               className="px-5 py-2.5 rounded-xl border border-border bg-card/50 hover:bg-card text-sm font-medium hover-lift transition-all cursor-pointer"
             >
-              Tizimga kirish
+              {t("navLogin")}
             </button>
             <button 
               onClick={() => setIsAuthModalOpen(true)}
               className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover-lift hover:brightness-110 transition-all cursor-pointer shadow-md shadow-primary/20"
             >
-              Hozir qo'shiling
+              {t("navRegister")}
             </button>
           </div>
 
@@ -141,19 +143,19 @@ export default function WelcomePage() {
             >
               <div className="px-6 py-6 flex flex-col gap-4">
                 <button onClick={() => scrollToSection("features")} className="text-left py-2 text-base font-medium text-muted-foreground hover:text-primary">
-                  Xususiyatlar
+                  {t("navFeatures")}
                 </button>
                 <button onClick={() => scrollToSection("simulator")} className="text-left py-2 text-base font-medium text-muted-foreground hover:text-primary">
-                  Simulyator
+                  {t("navSimulator")}
                 </button>
                 <button onClick={() => scrollToSection("stats")} className="text-left py-2 text-base font-medium text-muted-foreground hover:text-primary">
-                  Statistika
+                  {t("navStats")}
                 </button>
                 <button onClick={() => scrollToSection("karma")} className="text-left py-2 text-base font-medium text-muted-foreground hover:text-primary">
-                  Karma Tizimi
+                  {t("navKarmaSystem")}
                 </button>
                 <button onClick={() => scrollToSection("faq")} className="text-left py-2 text-base font-medium text-muted-foreground hover:text-primary">
-                  FAQ
+                  {t("navFaq")}
                 </button>
                 <div className="h-px bg-border my-2" />
                 <div className="flex gap-4">
@@ -161,13 +163,13 @@ export default function WelcomePage() {
                     onClick={() => { setMobileMenuOpen(false); setIsAuthModalOpen(true); }}
                     className="flex-1 py-3 rounded-xl border border-border bg-card text-center text-sm font-medium"
                   >
-                    Kirish
+                    {t("navLogin")}
                   </button>
                   <button 
                     onClick={() => { setMobileMenuOpen(false); setIsAuthModalOpen(true); }}
                     className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-center text-sm font-semibold shadow-md"
                   >
-                    Qo'shilish
+                    {t("navRegister")}
                   </button>
                 </div>
               </div>
@@ -183,19 +185,19 @@ export default function WelcomePage() {
           <div className="lg:col-span-7 flex flex-col text-left space-y-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent text-accent-foreground text-sm font-medium w-fit border border-primary/20">
               <Sparkles className="w-4 h-4 animate-pulse text-primary" />
-              <span>Mahalliy buyum almashish tizimi</span>
+              <span>{t("heroBadge")}</span>
             </div>
             
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
-              Yaqinlar bilan ulashing. <br />
+              {t("heroTitle").split(". ")[0]}. <br />
               <span className="bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 bg-clip-text text-transparent">
-                Karma to'plang.
+                {t("heroTitle").split(". ")[1]}.
               </span> <br />
-              Atrof-muhitni asrang.
+              {t("heroTitle").split(". ")[2]}
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-xl">
-              Ishlatmaydigan buyumlaringizni qo'shnilaringizga bepul bering, saxovat uchun Karma ochkolarini to'plang va mahalla obro'siga ega bo'ling.
+              {t("heroDescription")}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -203,7 +205,7 @@ export default function WelcomePage() {
                 onClick={() => setIsAuthModalOpen(true)}
                 className="px-8 py-4 rounded-2xl bg-primary text-primary-foreground font-bold text-lg hover-lift hover:brightness-110 cursor-pointer shadow-lg shadow-primary/25 flex items-center justify-center gap-2 group transition-all"
               >
-                <span>Hozir boshlash</span>
+                <span>{t("heroStartBtn")}</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               
@@ -211,7 +213,7 @@ export default function WelcomePage() {
                 onClick={() => scrollToSection("simulator")}
                 className="px-8 py-4 rounded-2xl border border-border bg-card/60 backdrop-blur-sm text-foreground font-semibold text-lg hover-lift hover:bg-card cursor-pointer transition-all flex items-center justify-center gap-2"
               >
-                <span>Qanday ishlaydi?</span>
+                <span>{t("heroHowBtn")}</span>
                 <Eye className="w-5 h-5 text-muted-foreground" />
               </button>
             </div>
@@ -223,21 +225,21 @@ export default function WelcomePage() {
                   <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
                   100%
                 </span>
-                <span className="text-xs text-muted-foreground">Xavfsiz va ishonchli</span>
+                <span className="text-xs text-muted-foreground">{t("heroTrustSafe")}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold text-foreground flex items-center gap-1.5">
                   <Recycle className="w-5 h-5 text-primary shrink-0" />
                   Yashil
                 </span>
-                <span className="text-xs text-muted-foreground">Eko-sustainability</span>
+                <span className="text-xs text-muted-foreground">{t("heroTrustEco")}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold text-foreground flex items-center gap-1.5">
                   <Flame className="w-5 h-5 text-secondary shrink-0" />
                   Gamified
                 </span>
-                <span className="text-xs text-muted-foreground">Obro' va Tiers</span>
+                <span className="text-xs text-muted-foreground">{t("heroTrustGamified")}</span>
               </div>
             </div>
 
@@ -256,10 +258,10 @@ export default function WelcomePage() {
                   <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
                     <Gift className="w-4.5 h-4.5 text-primary" />
                   </div>
-                  <span className="text-xs font-semibold text-muted-foreground">Oxirgi ulashilgan buyum</span>
+                  <span className="text-xs font-semibold text-muted-foreground">{t("lastSharedItem")}</span>
                 </div>
                 <span className="text-[10px] text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  Faol
+                  {t("activeStatus")}
                 </span>
               </div>
 
@@ -269,9 +271,9 @@ export default function WelcomePage() {
                   🚲
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-bold text-foreground truncate">Bolalar velosipedi</h3>
+                  <h3 className="text-lg font-bold text-foreground truncate">{t("mockItemTitle")}</h3>
                   <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5 leading-normal">
-                    5-8 yoshli bolalar uchun. Ishlatilgan, lekin holati juda yaxshi, hamma joyi butun.
+                    {t("mockItemDesc")}
                   </p>
                 </div>
               </div>
@@ -283,17 +285,17 @@ export default function WelcomePage() {
                     <User className="w-5 h-5 text-secondary" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-semibold">Anvar Sh.</h4>
-                    <p className="text-[10px] text-muted-foreground">Toshkent, Yunusobod (0.8km)</p>
+                    <h4 className="text-xs font-semibold">{t("mockItemUser")}</h4>
+                    <p className="text-[10px] text-muted-foreground">{t("mockItemLocation")}</p>
                   </div>
                 </div>
 
                 <div className="flex flex-col items-end">
                   <div className="flex items-center gap-1 text-[10px] font-bold text-amber-500">
                     <Award className="w-3.5 h-3.5" />
-                    <span>80 Karma</span>
+                    <span>{t("mockItemKarma")}</span>
                   </div>
-                  <span className="text-[8px] text-muted-foreground">Eco Supporter</span>
+                  <span className="text-[8px] text-muted-foreground">{t("mockItemRole")}</span>
                 </div>
               </div>
 
@@ -302,7 +304,7 @@ export default function WelcomePage() {
                 onClick={() => setIsAuthModalOpen(true)}
                 className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold hover-lift text-sm flex items-center justify-center gap-2 cursor-pointer shadow-md"
               >
-                <span>Buyumni so'rash</span>
+                <span>{t("mockItemRequest")}</span>
                 <ArrowUpRight className="w-4 h-4" />
               </button>
 
@@ -314,8 +316,8 @@ export default function WelcomePage() {
                 <Recycle className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-foreground">Havo tozaligi</span>
-                <span className="text-[8px] text-muted-foreground">CO2 kamaytirildi</span>
+                <span className="text-[10px] font-bold text-foreground">{t("cleanAir")}</span>
+                <span className="text-[8px] text-muted-foreground">{t("co2Reduced")}</span>
               </div>
             </div>
 
@@ -324,8 +326,8 @@ export default function WelcomePage() {
                 <Award className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-foreground">Karma obro'si</span>
-                <span className="text-[8px] text-muted-foreground">Yangi nishonlar</span>
+                <span className="text-[10px] font-bold text-foreground">{t("karmaRep")}</span>
+                <span className="text-[8px] text-muted-foreground">{t("newBadges")}</span>
               </div>
             </div>
 
@@ -339,15 +341,15 @@ export default function WelcomePage() {
         <div className="max-w-7xl mx-auto px-6 text-center">
           
           <div className="max-w-xl mx-auto space-y-4 mb-16">
-            <span className="text-xs font-bold text-primary tracking-widest uppercase">Platforma Ko'rsatkichlari</span>
-            <h2 className="text-3xl md:text-4xl font-extrabold">Hamjamiyatimizning real natijalari</h2>
+            <span className="text-xs font-bold text-primary tracking-widest uppercase">{t("statsTitle")}</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold">{t("statsSubtitle")}</h2>
             <p className="text-muted-foreground text-sm">
-              Mahalliy darajada birlashgan insonlarning atrof-muhit va o'zaro ishonchga qo'shgan hissasi raqamlarda.
+              {t("statsDesc")}
             </p>
             {stats && (
               <span className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full mt-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
-                Jonli Statistika
+                {t("statsLive")}
               </span>
             )}
           </div>
@@ -367,8 +369,8 @@ export default function WelcomePage() {
                   {displayUsers}+
                 </h3>
               )}
-              <span className="text-sm font-semibold text-foreground">Faol a'zolar</span>
-              <p className="text-[11px] text-muted-foreground mt-1">E'lon beruvchilar va so'rovchilar</p>
+              <span className="text-sm font-semibold text-foreground">{t("activeMembers")}</span>
+              <p className="text-[11px] text-muted-foreground mt-1">{t("activeMembersDesc")}</p>
             </div>
 
             {/* Stat Item 2 */}
@@ -383,8 +385,8 @@ export default function WelcomePage() {
                   {displayItems}+
                 </h3>
               )}
-              <span className="text-sm font-semibold text-foreground">Joylangan buyumlar</span>
-              <p className="text-[11px] text-muted-foreground mt-1">Sobiq ortiqcha buyumlar soni</p>
+              <span className="text-sm font-semibold text-foreground">{t("sharedItems")}</span>
+              <p className="text-[11px] text-muted-foreground mt-1">{t("sharedItemsDesc")}</p>
             </div>
 
             {/* Stat Item 3 */}
@@ -399,13 +401,13 @@ export default function WelcomePage() {
                   {displayHandovers}+
                 </h3>
               )}
-              <span className="text-sm font-semibold text-foreground">Topshirilgan buyumlar</span>
-              <p className="text-[11px] text-muted-foreground mt-1">Muvaffaqiyatli ulashilganlar</p>
+              <span className="text-sm font-semibold text-foreground">{t("handedOverItems")}</span>
+              <p className="text-[11px] text-muted-foreground mt-1">{t("handedOverItemsDesc")}</p>
             </div>
 
             {/* Stat Item 4 */}
             <div className="glass-effect rounded-2xl p-6 flex flex-col justify-center items-center text-center relative overflow-hidden group hover:border-primary/35 transition-all">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4 border border-amber-500/20">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4 border border-amber-500/25">
                 <Award className="w-6 h-6 text-secondary" />
               </div>
               {isLoading ? (
@@ -415,8 +417,8 @@ export default function WelcomePage() {
                   {displayKarma}+
                 </h3>
               )}
-              <span className="text-sm font-semibold text-foreground">Jami Karma ballari</span>
-              <p className="text-[11px] text-muted-foreground mt-1">Saxovat uchun taqdirlanganlar</p>
+              <span className="text-sm font-semibold text-foreground">{t("totalKarma")}</span>
+              <p className="text-[11px] text-muted-foreground mt-1">{t("totalKarmaDesc")}</p>
             </div>
 
           </div>
@@ -425,7 +427,7 @@ export default function WelcomePage() {
           {stats?.recentShares && stats.recentShares.length > 0 && (
             <div className="mt-16 max-w-3xl mx-auto text-left">
               <h4 className="text-sm font-bold text-muted-foreground mb-4 uppercase tracking-wider text-center">
-                Oxirgi faolliklar
+                {t("recentActivities")}
               </h4>
               <div className="bg-card/30 border border-border/40 rounded-2xl p-4 divide-y divide-border/30 backdrop-blur-sm">
                 {stats.recentShares.map((item) => (
@@ -434,7 +436,7 @@ export default function WelcomePage() {
                       <span className="text-base shrink-0">🎁</span>
                       <div>
                         <span className="font-semibold text-foreground">{item.user.full_name}</span>{" "}
-                        <span className="text-muted-foreground">ortiqcha buyumni joyladi:</span>{" "}
+                        <span className="text-muted-foreground">{t("recentActivityShared")}</span>{" "}
                         <span className="text-primary font-medium">{item.title}</span>
                       </div>
                     </div>
@@ -454,10 +456,10 @@ export default function WelcomePage() {
       {/* INTERACTIVE SIMULATOR SECTION */}
       <section id="simulator" className="py-24 max-w-7xl mx-auto px-6 relative z-10 w-full">
         <div className="max-w-2xl mx-auto text-center space-y-4 mb-16">
-          <span className="text-xs font-bold text-primary tracking-widest uppercase">Qanday ishlaydi?</span>
-          <h2 className="text-3xl md:text-4xl font-extrabold">Buyum ulashish sikli bilan tanishing</h2>
+          <span className="text-xs font-bold text-primary tracking-widest uppercase">{t("simulatorTitle")}</span>
+          <h2 className="text-3xl md:text-4xl font-extrabold">{t("simulatorSubtitle")}</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Ilovaning asosiy mexanikasini amalda ko'rish uchun quyidagi interaktiv simulyatordan foydalaning va qadamlarni bosib ko'ring.
+            {t("simulatorDesc")}
           </p>
         </div>
 
@@ -469,10 +471,10 @@ export default function WelcomePage() {
         <div className="max-w-7xl mx-auto px-6">
           
           <div className="text-center max-w-xl mx-auto space-y-4 mb-16">
-            <span className="text-xs font-bold text-primary tracking-widest uppercase">Nega aynan ShareFlow?</span>
-            <h2 className="text-3xl md:text-4xl font-extrabold">Bizning asosiy g'oyamiz va qadriyatlarimiz</h2>
+            <span className="text-xs font-bold text-primary tracking-widest uppercase">{t("featuresTitle")}</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold">{t("featuresSubtitle")}</h2>
             <p className="text-muted-foreground text-sm">
-              Biz oddiy almashish ilovasi emasmiz. Biz qo'shnichilik ishonchini tiklovchi gamifikatsiyalashgan ekotizimmiz.
+              {t("featuresDesc")}
             </p>
           </div>
 
@@ -483,9 +485,9 @@ export default function WelcomePage() {
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
                 <Leaf className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-xl font-bold text-foreground">Ekologik barqarorlik</h3>
+              <h3 className="text-xl font-bold text-foreground">{t("feature1Title")}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                Yaroqli holatda bo'lgan buyumlarni chiqindiga tashlashni to'xtating. Ularga boshqalar qo'lida ikkinchi umr berish orqali tabiatimiz va CO2 emissiyasini saqlang.
+                {t("feature1Desc")}
               </p>
             </div>
 
@@ -494,9 +496,9 @@ export default function WelcomePage() {
               <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center border border-secondary/20 shrink-0">
                 <Heart className="w-6 h-6 text-secondary" />
               </div>
-              <h3 className="text-xl font-bold text-foreground">Karma rag'bat tizimi</h3>
+              <h3 className="text-xl font-bold text-foreground">{t("feature2Title")}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                E'lon berib, buyumini muvaffaqiyatli topshirganlar doimiy taqdirlanadi. Karma ochkolarini to'plab mahalla Supporteridan Haqiqiy Eko-Qahramongacha ko'tariling.
+                {t("feature2Desc")}
               </p>
             </div>
 
@@ -505,9 +507,9 @@ export default function WelcomePage() {
               <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shrink-0">
                 <Shield className="w-6 h-6 text-emerald-500" />
               </div>
-              <h3 className="text-xl font-bold text-foreground">Hyper-Local ishonch</h3>
+              <h3 className="text-xl font-bold text-foreground">{t("feature3Title")}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                Platforma sizga faqat yaqin masofadagi buyum va odamlarni ko'rsatadi. Aloqa ma'lumotlari esa xavfsizlik maqsadida faqat tasdiqdan so'nggina ochiladi.
+                {t("feature3Desc")}
               </p>
             </div>
 
@@ -521,12 +523,12 @@ export default function WelcomePage() {
         <div className="grid lg:grid-cols-12 gap-12 items-center">
           
           <div className="lg:col-span-6 flex flex-col space-y-6">
-            <span className="text-xs font-bold text-secondary tracking-widest uppercase">Geymifikatsiya Tizimi</span>
+            <span className="text-xs font-bold text-secondary tracking-widest uppercase">{t("gamificationTitle")}</span>
             <h2 className="text-3xl md:text-4xl font-extrabold leading-tight text-foreground">
-              Saxovatliligingiz sizga obro' olib keladi
+              {t("gamificationSubtitle")}
             </h2>
             <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
-              ShareFlow givers (sahovat ko'rsatuvchilarni) chin dildan qadrlaydi. Har bir muvaffaqiyatli handover (+10 ball) beradi. Profilingizga qarab obro' darajalari va maxsus medal/nishonlar beriladi:
+              {t("gamificationDesc")}
             </p>
 
             <div className="space-y-4">
@@ -537,8 +539,8 @@ export default function WelcomePage() {
                   🌱
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm text-foreground">Seed Giver (Obro' darajasi: 0 - 50 ball)</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">Yangi boshlovchi sahovatli a'zo nishoni. Jamiyatga ilk hissasini qo'shayotgan maysalar.</p>
+                  <h4 className="font-bold text-sm text-foreground">{t("tier1Title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("tier1Desc")}</p>
                 </div>
               </div>
 
@@ -548,8 +550,8 @@ export default function WelcomePage() {
                   🤝
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm text-foreground">Community Supporter (Obro' darajasi: 51 - 150 ball)</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">Mahalladoshlar o'rtasida ishonchli va faol, doimiy yordam ko'rsatib kelayotgan qo'shni unvoni.</p>
+                  <h4 className="font-bold text-sm text-foreground">{t("tier2Title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("tier2Desc")}</p>
                 </div>
               </div>
 
@@ -559,8 +561,8 @@ export default function WelcomePage() {
                   👑
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm text-foreground">Eco Hero (Obro' darajasi: 150+ ball)</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">Mahalla qahramoni! Juda ko'p buyumlar ulashgan va barqaror hayot tarafdori bo'lgan yuksak unvon.</p>
+                  <h4 className="font-bold text-sm text-foreground">{t("tier3Title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("tier3Desc")}</p>
                 </div>
               </div>
 
@@ -576,41 +578,41 @@ export default function WelcomePage() {
                   👑
                 </div>
                 <div>
-                  <h4 className="font-bold text-foreground text-base">Jasur Qahramonov</h4>
+                  <h4 className="font-bold text-foreground text-base">{t("userMockName")}</h4>
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-primary" />
-                    Toshkent shahar (Eco Hero)
+                    {t("userMockTitle")}
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-card-dark rounded-xl p-3 text-center border border-border/30">
-                  <span className="text-xs text-muted-foreground block">Jami Karma</span>
-                  <span className="text-xl font-bold text-secondary">180 Ball</span>
+                  <span className="text-xs text-muted-foreground block">{t("userMockTotalKarma")}</span>
+                  <span className="text-xl font-bold text-secondary">{t("userMockTotalKarmaValue")}</span>
                 </div>
                 <div className="bg-card-dark rounded-xl p-3 text-center border border-border/30">
-                  <span className="text-xs text-muted-foreground block">Ulashildi</span>
-                  <span className="text-xl font-bold text-primary">18 Ta buyum</span>
+                  <span className="text-xs text-muted-foreground block">{t("userMockSharedCount")}</span>
+                  <span className="text-xl font-bold text-primary">{t("userMockSharedCountValue")}</span>
                 </div>
               </div>
 
               <div>
                 <h5 className="text-xs font-bold text-muted-foreground uppercase mb-3 tracking-wider">
-                  Yutuqlar (Achievements)
+                  {t("achievementsTitle")}
                 </h5>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="flex flex-col items-center gap-1.5 p-2 bg-card rounded-lg text-center border border-border/50">
                     <span className="text-2xl">🌱</span>
-                    <span className="text-[9px] font-semibold">Birinchi ulashish</span>
+                    <span className="text-[9px] font-semibold">{t("achievement1")}</span>
                   </div>
                   <div className="flex flex-col items-center gap-1.5 p-2 bg-card rounded-lg text-center border border-border/50">
                     <span className="text-2xl">⚡</span>
-                    <span className="text-[9px] font-semibold">Tez topshiruvchi</span>
+                    <span className="text-[9px] font-semibold">{t("achievement2")}</span>
                   </div>
                   <div className="flex flex-col items-center gap-1.5 p-2 bg-card rounded-lg text-center border border-border/50">
                     <span className="text-2xl">🔌</span>
-                    <span className="text-[9px] font-semibold">Kategoriya Eksperti</span>
+                    <span className="text-[9px] font-semibold">{t("achievement3")}</span>
                   </div>
                 </div>
               </div>
@@ -626,10 +628,10 @@ export default function WelcomePage() {
         <div className="max-w-4xl mx-auto px-6">
           
           <div className="text-center max-w-xl mx-auto space-y-4 mb-16">
-            <span className="text-xs font-bold text-primary tracking-widest uppercase">Savollar va Javoblar</span>
-            <h2 className="text-3xl md:text-4xl font-extrabold">Ko'p beriladigan savollar (FAQ)</h2>
+            <span className="text-xs font-bold text-primary tracking-widest uppercase">{t("faqTitle")}</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold">{t("faqSubtitle")}</h2>
             <p className="text-muted-foreground text-sm">
-              ShareFlow loyihasiga bog'liq eng ko'p so'raladigan savollar va ularga javoblar bilan tanishing.
+              {t("faqDesc")}
             </p>
           </div>
 
@@ -638,37 +640,37 @@ export default function WelcomePage() {
               
               <AccordionItem value="item-1">
                 <AccordionTrigger className="text-base font-semibold text-foreground hover:no-underline py-4">
-                  Loyihadan foydalanish mutlaqo bepulmi?
+                  {t("faqQ1")}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground leading-relaxed text-sm">
-                  Ha, ShareFlow to'liq bepul va notijorat loyiha hisoblanadi. Undagi barcha buyumlar faqat sovg'a yoki tekin ulashish sifatida beriladi, sotish yoki ijara butunlay taqiqlangan. Hech qanday yashirin komissiyalar yo'q.
+                  {t("faqA1")}
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-2">
                 <AccordionTrigger className="text-base font-semibold text-foreground hover:no-underline py-4">
-                  Karma ochkolari nima va u qanday foyda beradi?
+                  {t("faqQ2")}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground leading-relaxed text-sm">
-                  Karma ochkolari loyihada sahovat ko'rsatgan foydalanuvchilarning ishonchlilik darajasini ko'rsatadi. Ballaringiz ko'p bo'lsa profilingizga nishonlar beriladi, mahalla obro'siga ega bo'lasiz va boshqa odamlar o'z buyumlarini aynan sizga ishonib berish ehtimoli keskin oshadi.
+                  {t("faqA2")}
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-3">
                 <AccordionTrigger className="text-base font-semibold text-foreground hover:no-underline py-4">
-                  Xavfsizlik va shaxsiy ma'lumotlar maxfiyligi qanday ta'minlanadi?
+                  {t("faqQ3")}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground leading-relaxed text-sm">
-                  Sizning telefon raqamingiz faqat siz so'rovini ma'qullagan (qabul qilgan) a'zogagina ko'rinadi. Ungacha profilingizdagi telefon raqami yashirin saqlanadi. Ilova aniq manzilingizni emas, taxminiy yashash hududingiz (masalan, Yunusobod 4) va buyumlar orasidagi masofani (masalan, 1.2km) ko'rsatadi.
+                  {t("faqA3")}
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-4">
                 <AccordionTrigger className="text-base font-semibold text-foreground hover:no-underline py-4">
-                  Yomon holatdagi, buzilgan yoki taqiqlangan narsalarni joylashtirsa nima bo'ladi?
+                  {t("faqQ4")}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground leading-relaxed text-sm">
-                  A'zolar yaroqsiz yoki shubhali buyumlar ustidan shikoyat (Report) qilishlari mumkin. Shikoyatlar administratorlar tomonidan zudlik bilan tekshiriladi va qoidabuzar foydalanuvchi obro'si kamaytiriladi yoki tizimdan butunlay chetlatiladi.
+                  {t("faqA4")}
                 </AccordionContent>
               </AccordionItem>
 
@@ -687,16 +689,16 @@ export default function WelcomePage() {
 
           <div className="max-w-2xl mx-auto space-y-6">
             <h2 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-tight">
-              Siz ham mahallangiz yaxshilanishiga hissa qo'shing
+              {t("footerBannerTitle")}
             </h2>
             <p className="text-muted-foreground text-base max-w-lg mx-auto">
-              Hozir ro'yxatdan o'ting, yoningizdagi foydali buyumlarni qidirib ko'ring va ilk ortiqcha buyumingizni ulashib o'z obro'ingizni oshirishni boshlang!
+              {t("footerBannerDesc")}
             </p>
             <button 
               onClick={() => setIsAuthModalOpen(true)}
               className="px-8 py-4 rounded-2xl bg-primary text-primary-foreground font-bold text-lg hover-lift hover:brightness-110 shadow-lg cursor-pointer transition-all inline-flex items-center gap-2"
             >
-              <span>Jamiyatga a'zo bo'lish</span>
+              <span>{t("footerBannerBtn")}</span>
               <ArrowRight className="w-5 h-5" />
             </button>
           </div>
@@ -715,13 +717,13 @@ export default function WelcomePage() {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} ShareFlow. Mahalliy barqarorlik va o'zaro ishonch ekotizimi. Barcha huquqlar himoyalangan.
+            © {new Date().getFullYear()} {t("footerCopyright")}
           </p>
 
           <div className="flex gap-4">
-            <a href="#" className="text-xs text-muted-foreground hover:text-primary transition-colors">Foydalanish shartlari</a>
+            <a href="#" className="text-xs text-muted-foreground hover:text-primary transition-colors">{t("footerTerms")}</a>
             <span className="text-muted-foreground/30">|</span>
-            <a href="#" className="text-xs text-muted-foreground hover:text-primary transition-colors">Xavfsizlik qoidalari</a>
+            <a href="#" className="text-xs text-muted-foreground hover:text-primary transition-colors">{t("footerPrivacy")}</a>
           </div>
         </div>
       </footer>
@@ -730,9 +732,9 @@ export default function WelcomePage() {
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
         <DialogContent className="max-w-md p-0 border-none bg-transparent shadow-none [&>button]:hidden">
           <DialogHeader className="sr-only">
-            <DialogTitle>Tizimga Kirish / Ro'yxatdan o'tish</DialogTitle>
+            <DialogTitle>{t("authModalTitle")}</DialogTitle>
             <DialogDescription>
-              ShareFlow hamjamiyatiga kirish yoki yangi profil ochish oynasi.
+              {t("authModalDesc")}
             </DialogDescription>
           </DialogHeader>
           <AuthCard onClose={() => setIsAuthModalOpen(false)} />

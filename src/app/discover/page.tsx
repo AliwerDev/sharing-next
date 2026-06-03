@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useGetActiveItems, useGetProfile } from "@/api/hooks";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 function getImageUrl(url?: string) {
   if (!url)
@@ -25,6 +26,7 @@ function DiscoverContent() {
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || undefined;
   const category_id = searchParams.get("category_id") || undefined;
+  const t = useTranslations();
 
   const { data: profile } = useGetProfile();
   const latitude = profile?.latitude ? String(profile.latitude) : undefined;
@@ -50,7 +52,7 @@ function DiscoverContent() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold tracking-tight">
-              Explore Categories
+              {t("exploreCategories")}
             </h2>
           </div>
           <CategoryCarousel />
@@ -59,25 +61,24 @@ function DiscoverContent() {
         {/* Feed Section */}
         <section>
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold">Your Neighborhood Feed</h1>
+            <h1 className="text-3xl font-bold">{t("neighborhoodFeed")}</h1>
             <span className="text-sm text-muted-foreground font-medium bg-muted px-3 py-1 rounded-full hidden sm:inline-block">
-              Showing items within 10km
+              {t("showingWithinDistance")}
             </span>
           </div>
 
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
-              <p className="text-muted-foreground">Finding nearby items...</p>
+              <p className="text-muted-foreground">{t("findingNearby")}</p>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center text-center py-20 px-4 glass-effect rounded-3xl border border-destructive/50">
               <h2 className="text-2xl font-bold mb-2 text-destructive">
-                Oops, something went wrong.
+                {t("oopsSomethingWrong")}
               </h2>
               <p className="text-muted-foreground mb-8">
-                We couldn&apos;t load the community feed right now. Please try
-                again later.
+                {t("couldNotLoadFeed")}
               </p>
             </div>
           ) : items.length > 0 ? (
@@ -89,7 +90,7 @@ function DiscoverContent() {
                   category:
                     typeof item.category === "object"
                       ? item.category?.name
-                      : item.category || "Other",
+                      : item.category || t("other"),
                   imageUrl: getImageUrl(item.images?.[0]?.image_url),
                   distance: item.distance || "0.8 km",
                   status: item.status,
@@ -108,15 +109,14 @@ function DiscoverContent() {
                 <Leaf className="w-10 h-10 text-primary" />
               </div>
               <h2 className="text-2xl font-bold mb-2">
-                It&apos;s quiet around here...
+                {t("quietAroundHere")}
               </h2>
               <p className="text-muted-foreground max-w-md mb-8">
-                No active items in your neighborhood yet. Be the first to share
-                something and earn your first Karma Points!
+                {t("noActiveItems")}
               </p>
               <Link href="/share">
                 <Button className="rounded-full shadow-lg hover-lift tactile-scale gap-2 px-8 py-6 text-lg">
-                  <Plus className="w-5 h-5" /> Be the First to Share
+                  <Plus className="w-5 h-5" /> {t("beFirstToShare")}
                 </Button>
               </Link>
             </div>
@@ -128,6 +128,7 @@ function DiscoverContent() {
 }
 
 export default function DiscoverPage() {
+  const t = useTranslations();
   return (
     <Suspense
       fallback={
@@ -142,7 +143,7 @@ export default function DiscoverPage() {
           </header>
           <div className="flex-1 flex flex-col items-center justify-center py-20">
             <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
-            <p className="text-muted-foreground">Finding nearby items...</p>
+            <p className="text-muted-foreground">{t("findingNearby")}</p>
           </div>
         </div>
       }

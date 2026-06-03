@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useGetProfile, useUpdateProfile, useGetMyItems, useGetMyRequests, useUploadImage } from "@/api/hooks";
 import { toast } from "sonner";
 import { YandexMapModal } from "@/components/YandexMapModal";
+import { useTranslations } from "next-intl";
 
 function getImageUrl(url?: string) {
   if (!url) return "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80";
@@ -18,6 +19,8 @@ function getImageUrl(url?: string) {
 }
 
 function ProfileContent() {
+  const t = useTranslations();
+
   // Queries
   const { data: profile, isLoading: isProfileLoading } = useGetProfile();
   const { data: myShares = [] } = useGetMyItems();
@@ -52,7 +55,7 @@ function ProfileContent() {
         <Navigation />
         <div className="flex-1 flex flex-col items-center justify-center">
           <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
-          <p className="text-muted-foreground">Loading profile...</p>
+          <p className="text-muted-foreground">{t("loadingProfile")}</p>
         </div>
       </div>
     );
@@ -64,11 +67,11 @@ function ProfileContent() {
   const activeRequestsCount = myRequests.filter((r) => r.status === "PENDING" || r.status === "APPROVED").length;
 
   const achievements = [
-    { id: 1, title: "First Gift", icon: <Gift className="w-8 h-8" />, unlocked: sharedCount >= 1 || profile?.badges?.includes("First Gift"), color: "text-emerald-500" },
-    { id: 2, title: "Category Expert", icon: <Award className="w-8 h-8" />, unlocked: sharedCount >= 3 || profile?.badges?.includes("Category Expert"), color: "text-blue-500" },
-    { id: 3, title: "Neighbor of the Month", icon: <Star className="w-8 h-8" />, unlocked: karma > 100 || profile?.badges?.includes("Neighbor of the Month"), color: "text-amber-500" },
-    { id: 4, title: "Eco Hero", icon: <HandHeart className="w-8 h-8" />, unlocked: karma > 150 || profile?.badges?.includes("Eco Hero"), color: "text-primary" },
-    { id: 5, title: "100 Karma Club", icon: <Award className="w-8 h-8" />, unlocked: karma >= 100 || profile?.badges?.includes("100 Karma Club"), color: "text-purple-500" },
+    { id: 1, title: t("badgeFirstGift"), icon: <Gift className="w-8 h-8" />, unlocked: sharedCount >= 1 || profile?.badges?.includes("First Gift"), color: "text-emerald-500" },
+    { id: 2, title: t("badgeCategoryExpert"), icon: <Award className="w-8 h-8" />, unlocked: sharedCount >= 3 || profile?.badges?.includes("Category Expert"), color: "text-blue-500" },
+    { id: 3, title: t("badgeNeighborMonth"), icon: <Star className="w-8 h-8" />, unlocked: karma > 100 || profile?.badges?.includes("Neighbor of the Month"), color: "text-amber-500" },
+    { id: 4, title: t("badgeEcoHero"), icon: <HandHeart className="w-8 h-8" />, unlocked: karma > 150 || profile?.badges?.includes("Eco Hero"), color: "text-primary" },
+    { id: 5, title: t("badge100KarmaClub"), icon: <Award className="w-8 h-8" />, unlocked: karma >= 100 || profile?.badges?.includes("100 Karma Club"), color: "text-purple-500" },
   ];
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,10 +137,10 @@ function ProfileContent() {
             <h1 className="text-4xl font-bold mb-2">{profile?.full_name}</h1>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-muted-foreground">
               <div className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-full text-sm font-medium">
-                <MapPin className="w-4 h-4" /> {profile?.location || "No location set"}
+                <MapPin className="w-4 h-4" /> {profile?.location || t("noLocationSet")}
               </div>
               <div className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-full text-sm font-medium">
-                <Calendar className="w-4 h-4" /> Member since {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : "recently"}
+                <Calendar className="w-4 h-4" /> {t("memberSince")} {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : t("recently")}
               </div>
             </div>
           </div>
@@ -150,23 +153,23 @@ function ProfileContent() {
             
             {/* Impact Grid */}
             <section>
-              <h2 className="text-2xl font-bold mb-6">Your Impact</h2>
+              <h2 className="text-2xl font-bold mb-6">{t("yourImpact")}</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="glass-effect rounded-2xl p-6 text-center hover-lift transition-all">
                   <div className="text-3xl font-black bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent mb-1">{karma}</div>
-                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Karma Points</div>
+                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{t("karmaPoints")}</div>
                 </div>
                 <div className="glass-effect rounded-2xl p-6 text-center hover-lift transition-all">
                   <div className="text-3xl font-black text-primary mb-1">{sharedCount}</div>
-                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Items Shared</div>
+                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{t("itemsShared")}</div>
                 </div>
                 <div className="glass-effect rounded-2xl p-6 text-center hover-lift transition-all">
                   <div className="text-3xl font-black text-blue-500 mb-1">{receivedCount}</div>
-                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Items Received</div>
+                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{t("itemsReceived")}</div>
                 </div>
                 <div className="glass-effect rounded-2xl p-6 text-center hover-lift transition-all">
                   <div className="text-3xl font-black text-foreground mb-1">{activeRequestsCount}</div>
-                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Active Requests</div>
+                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{t("activeRequests")}</div>
                 </div>
               </div>
             </section>
@@ -174,9 +177,9 @@ function ProfileContent() {
             {/* Achievements Locker */}
             <section>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">Achievements Locker</h2>
+                <h2 className="text-2xl font-bold">{t("achievementsLocker")}</h2>
                 <span className="text-sm font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">
-                  {achievements.filter(a => a.unlocked).length} / {achievements.length} Unlocked
+                  {t("badgeUnlocked", { unlocked: achievements.filter(a => a.unlocked).length, total: achievements.length })}
                 </span>
               </div>
               
@@ -200,7 +203,7 @@ function ProfileContent() {
                     </h3>
                     {!badge.unlocked && (
                       <div className="mt-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-center gap-1">
-                        <Lock className="w-3 h-3" /> Locked
+                        <Lock className="w-3 h-3" /> {t("locked")}
                       </div>
                     )}
                   </div>
@@ -212,11 +215,11 @@ function ProfileContent() {
           {/* Settings Form */}
           <div className="lg:col-span-1">
             <div className="glass-effect rounded-3xl p-6 border border-border sticky top-24">
-              <h2 className="text-xl font-bold mb-6">Profile Settings</h2>
+              <h2 className="text-xl font-bold mb-6">{t("profileSettings")}</h2>
               
               <form onSubmit={handleSave} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-muted-foreground">Full Name</label>
+                  <label className="block text-sm font-medium text-muted-foreground">{t("fullNameLabel")}</label>
                   <div className="relative">
                     <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input 
@@ -230,7 +233,7 @@ function ProfileContent() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-muted-foreground">Phone Number</label>
+                  <label className="block text-sm font-medium text-muted-foreground">{t("phoneNumberLabel")}</label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input 
@@ -244,7 +247,7 @@ function ProfileContent() {
                 </div>
 
                  <div className="space-y-2">
-                  <label className="block text-sm font-medium text-muted-foreground">Location</label>
+                  <label className="block text-sm font-medium text-muted-foreground">{t("locationLabel")}</label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input 
@@ -262,17 +265,17 @@ function ProfileContent() {
                     className="w-full mt-2 py-4 rounded-xl border-dashed border-primary/40 hover:border-primary text-primary flex items-center justify-center gap-2 text-xs font-semibold"
                   >
                     <MapPin className="w-4 h-4" />
-                    {latitude && longitude ? "Change location on Map" : "Select location on Map"}
+                    {latitude && longitude ? t("changeLocationOnMap") : t("selectLocationOnMap")}
                   </Button>
                 </div>
 
                 <div className="space-y-2 pt-2 border-t border-border mt-4">
-                  <label className="block text-sm font-medium text-muted-foreground">Change Password</label>
+                  <label className="block text-sm font-medium text-muted-foreground">{t("changePasswordLabel")}</label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input 
                       type="password" 
-                      placeholder="New password"
+                      placeholder={t("newPasswordPlaceholder")}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 bg-input-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
@@ -286,7 +289,7 @@ function ProfileContent() {
                   disabled={updateProfileMutation.isPending}
                   className="w-full mt-6 rounded-xl hover-lift tactile-scale"
                 >
-                  {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+                  {updateProfileMutation.isPending ? t("saving") : t("saveChanges")}
                 </Button>
               </form>
             </div>

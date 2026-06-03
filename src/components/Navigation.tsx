@@ -6,12 +6,16 @@ import { Leaf, Search, MapPin, Bell, User as UserIcon, Plus } from "lucide-react
 import { Button } from "./ui/button";
 import { useGetProfile } from "@/api/hooks";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Navigation() {
   const { data: profile } = useGetProfile();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations();
+  const locale = useLocale();
 
   const [searchVal, setSearchVal] = useState("");
 
@@ -55,21 +59,23 @@ export function Navigation() {
               type="text" 
               value={searchVal}
               onChange={(e) => setSearchVal(e.target.value)}
-              placeholder="Search items..." 
+              placeholder={t("navSearchPlaceholder")} 
               className="w-full h-10 pl-10 pr-4 rounded-full bg-input-background border border-input focus:outline-none focus:ring-2 focus:ring-ring transition-all"
             />
           </div>
           <Link href="/profile" className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full glass-effect hover-lift cursor-pointer text-muted-foreground hover:text-foreground shrink-0">
             <MapPin className="w-4 h-4 text-secondary" />
-            <span>{profile?.location || "Loading location..."}</span>
+            <span>{profile?.location || t("navLoadingLocation")}</span>
           </Link>
         </form>
 
         {/* Action Icons */}
         <div className="flex items-center gap-3">
+          <LanguageSwitcher currentLocale={locale} />
+
           <Link href="/share">
             <Button className="rounded-full shadow-md hover-lift tactile-scale gap-2 hidden sm:flex">
-              <Plus className="w-4 h-4" /> Share Item
+              <Plus className="w-4 h-4" /> {t("navShareItem")}
             </Button>
           </Link>
           
@@ -97,7 +103,7 @@ export function Navigation() {
               type="text" 
               value={searchVal}
               onChange={(e) => setSearchVal(e.target.value)}
-              placeholder="Search..." 
+              placeholder={t("navSearchPlaceholder")} 
               className="w-full h-10 pl-10 pr-4 rounded-full bg-input-background border border-input focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
@@ -108,3 +114,4 @@ export function Navigation() {
     </header>
   );
 }
+

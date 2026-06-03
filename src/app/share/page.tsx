@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useGetCategories, useGetProfile, useUploadImage, useCreateItem } from "@/api/hooks";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 function getImageUrl(url?: string) {
   if (!url) return "";
@@ -18,6 +19,7 @@ function getImageUrl(url?: string) {
 }
 
 function ShareWizardContent() {
+  const t = useTranslations();
   const [step, setStep] = useState(1);
   const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState("");
@@ -100,15 +102,15 @@ function ShareWizardContent() {
         </div>
 
         <h1 className="text-4xl font-bold text-center mb-4 bg-linear-to-r from-emerald-500 to-emerald-700 bg-clip-text text-transparent">
-          Thank you for giving back!
+          {t("thankYouGiveBack")}
         </h1>
         <p className="text-xl text-muted-foreground text-center max-w-md mb-12">
-          Your listing &quot;{title}&quot; is now live in your neighborhood.
+          {t("listingIsLive", { title })}
         </p>
 
         <Link href="/dashboard">
           <Button className="py-6 px-10 rounded-full text-lg shadow-lg hover-lift tactile-scale">
-            View My Dashboard
+            {t("viewDashboard")}
           </Button>
         </Link>
       </div>
@@ -131,8 +133,8 @@ function ShareWizardContent() {
             <ChevronLeft className="w-6 h-6" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold">Share an Item</h1>
-            <p className="text-sm text-muted-foreground">Step {step} of 3</p>
+            <h1 className="text-2xl font-bold">{t("shareAnItem")}</h1>
+            <p className="text-sm text-muted-foreground">{t("stepProgress", { step })}</p>
           </div>
         </div>
 
@@ -150,9 +152,9 @@ function ShareWizardContent() {
         >
           {step === 1 && (
             <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
-              <h2 className="text-xl font-semibold">Upload Photos</h2>
+              <h2 className="text-xl font-semibold">{t("uploadPhotos")}</h2>
               <p className="text-sm text-muted-foreground">
-                Add up to 5 clear photos of the item. Good photos build trust!
+                {t("photoGuideline")}
               </p>
 
               <div
@@ -165,10 +167,10 @@ function ShareWizardContent() {
                   <UploadCloud className="w-10 h-10 text-primary mb-3" />
                 )}
                 <span className="font-medium">
-                  Tap or drag to upload photos
+                  {t("dragUpload")}
                 </span>
                 <span className="text-xs text-muted-foreground mt-1">
-                  JPEG, PNG up to 5MB
+                  {t("fileSizeLimit")}
                 </span>
                 <input
                   type="file"
@@ -208,22 +210,22 @@ function ShareWizardContent() {
 
           {step === 2 && (
             <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
-              <h2 className="text-xl font-semibold">Item Details</h2>
+              <h2 className="text-xl font-semibold">{t("itemDetails")}</h2>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Title</label>
+                <label className="block text-sm font-medium">{t("inputTitleLabel")}</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., Ceramic Plant Pots (Set of 3)"
+                  placeholder={t("inputTitlePlaceholder")}
                   className="w-full px-4 py-3 bg-input-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Category</label>
+                <label className="block text-sm font-medium">{t("inputCategoryLabel")}</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
@@ -231,7 +233,7 @@ function ShareWizardContent() {
                   required
                 >
                   <option value="" disabled>
-                    Select a category...
+                    {t("inputCategorySelect")}
                   </option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
@@ -242,11 +244,11 @@ function ShareWizardContent() {
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Description</label>
+                <label className="block text-sm font-medium">{t("inputDescLabel")}</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe the condition, size, and why you are giving it away..."
+                  placeholder={t("inputDescPlaceholder")}
                   rows={5}
                   className="w-full px-4 py-3 bg-input-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-all resize-none"
                   required
@@ -257,9 +259,9 @@ function ShareWizardContent() {
 
           {step === 3 && (
             <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
-              <h2 className="text-xl font-semibold">Confirm Location</h2>
+              <h2 className="text-xl font-semibold">{t("confirmLocation")}</h2>
               <p className="text-sm text-muted-foreground">
-                Where should the requester come to pick this up?
+                {t("whereToPick")}
               </p>
 
               <div className="glass-effect rounded-2xl p-4 border border-border">
@@ -269,7 +271,7 @@ function ShareWizardContent() {
                 </div>
                 <div className="flex items-center justify-between pt-4 border-t border-border/50">
                   <span className="text-sm text-muted-foreground">
-                    Use my default neighborhood
+                    {t("useDefaultNeighborhood")}
                   </span>
                   {/* Mock Toggle */}
                   <div className="w-12 h-6 bg-primary rounded-full relative cursor-pointer">
@@ -292,15 +294,15 @@ function ShareWizardContent() {
             >
               {isSubmitting ? (
                 <>
-                  Publishing... <Loader2 className="w-5 h-5 animate-spin" />
+                  {t("publishing")} <Loader2 className="w-5 h-5 animate-spin" />
                 </>
               ) : step === 3 ? (
                 <>
-                  Publish Listing <CheckCircle className="w-5 h-5" />
+                  {t("publishListing")} <CheckCircle className="w-5 h-5" />
                 </>
               ) : (
                 <>
-                  Next Step <ArrowRight className="w-5 h-5" />
+                  {t("nextStep")} <ArrowRight className="w-5 h-5" />
                 </>
               )}
             </Button>
